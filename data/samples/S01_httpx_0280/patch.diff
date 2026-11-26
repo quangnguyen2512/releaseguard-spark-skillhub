@@ -1,0 +1,26 @@
+diff --git a/http_client/config.py b/http_client/config.py
+index 1111111..2222222 100644
+--- a/http_client/config.py
++++ b/http_client/config.py
+@@ -2,6 +2,8 @@
+ 
+ 
+ def build_ssl_settings(verify=True, cert=None):
++    if isinstance(verify, ssl.SSLContext):
++        return verify
+     ctx = ssl.create_default_context()
+     if cert is not None:
+         ctx.load_cert_chain(cert)
+diff --git a/http_client/transport.py b/http_client/transport.py
+index 1111111..2222222 100644
+--- a/http_client/transport.py
++++ b/http_client/transport.py
+@@ -5,6 +5,6 @@
+     def __init__(self, timeout=10.0):
+         self.timeout = timeout
+ 
+-    def open_connection(self, url, proxies=None, ssl_context=None):
++    def open_connection(self, url, proxy=None, ssl_context=None):
+         ctx = build_ssl_settings(verify=ssl_context)
+-        return {"url": url, "proxies": proxies, "ssl_ready": ctx is not None, "timeout": self.timeout}
++        return {"url": url, "proxy": proxy, "ssl_ready": ctx is not None, "timeout": self.timeout}

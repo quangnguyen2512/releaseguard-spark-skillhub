@@ -1,0 +1,47 @@
+{
+  "sample_id": "S02_fastapi_01150",
+  "project": "fastapi/fastapi",
+  "from_version": "0.114.2",
+  "to_version": "0.115.0",
+  "release_url": "https://github.com/fastapi/fastapi/releases/tag/0.115.0",
+  "license": "MIT",
+  "acceptance_criteria": [
+    "Must flag removal of regex in build_query_validator() -> pattern as breaking=true grounded in RN-1.",
+    "Must trace build_query_validator() to endpoints/search_api.py::search_items_endpoint and register_lifespan_hooks() to endpoints/app_factory.py::create_service_app.",
+    "Must NOT mark RN-3 (Annotated Form additive support) as breaking=true.",
+    "Must preserve uncertainty in RN-4 (no owner or release date invented for OAuth2PasswordBearer tokenUrl)."
+  ],
+  "expected_breaking_line_ids": [
+    "RN-1"
+  ],
+  "non_breaking_trap_line_ids": [
+    "RN-2",
+    "RN-3",
+    "RN-4"
+  ],
+  "must_include_tokens": [
+    "0.115.0",
+    "regex",
+    "pattern",
+    "lifespan"
+  ],
+  "expected_changed_files": [
+    "api_core/lifespan.py",
+    "api_core/params.py"
+  ],
+  "expected_seed_nodes": [
+    "api_core/params.py::build_query_validator",
+    "api_core/lifespan.py::register_lifespan_hooks"
+  ],
+  "expected_affected_callers": [
+    "endpoints/search_api.py::search_items_endpoint",
+    "endpoints/app_factory.py::create_service_app"
+  ],
+  "expected_selected_tests": [
+    "test_search_items_pattern_validation",
+    "test_create_service_app_lifespan"
+  ],
+  "excluded_unrelated_tests": [
+    "test_liveness_probe"
+  ]
+}

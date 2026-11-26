@@ -1,0 +1,48 @@
+{
+  "sample_id": "S01_httpx_0280",
+  "project": "encode/httpx",
+  "from_version": "0.27.2",
+  "to_version": "0.28.0",
+  "release_url": "https://github.com/encode/httpx/releases/tag/0.28.0",
+  "license": "BSD-3-Clause",
+  "acceptance_criteria": [
+    "Must identify removal of proxies=... in favor of proxy=... as breaking=true with verbatim RN-1 quote.",
+    "Must identify deprecation of non-SSLContext verify/cert inputs in build_ssl_settings() as breaking=false (deprecation) grounded in RN-2.",
+    "Must NOT mark RN-3 (max_keepalive_connections=20, max_connections=100 unchanged) or RN-4 (DigestAuth bugfix) as breaking=true.",
+    "Must trace changed symbols http_client/transport.py::ClientSession::open_connection and http_client/config.py::build_ssl_settings to downstream features WebhookDispatcher.deliver_event and refresh_access_token.",
+    "Must select regression tests test_deliver_event_uses_proxy and test_refresh_access_token_ssl_context while excluding unrelated test_compute_backoff_delay."
+  ],
+  "expected_breaking_line_ids": [
+    "RN-1"
+  ],
+  "non_breaking_trap_line_ids": [
+    "RN-2",
+    "RN-3",
+    "RN-4"
+  ],
+  "must_include_tokens": [
+    "0.28.0",
+    "proxies",
+    "proxy",
+    "SSLContext"
+  ],
+  "expected_changed_files": [
+    "http_client/config.py",
+    "http_client/transport.py"
+  ],
+  "expected_seed_nodes": [
+    "http_client/config.py::build_ssl_settings",
+    "http_client/transport.py::ClientSession::open_connection"
+  ],
+  "expected_affected_callers": [
+    "services/webhook_sender.py::WebhookDispatcher::deliver_event",
+    "services/oauth_fetcher.py::refresh_access_token"
+  ],
+  "expected_selected_tests": [
+    "test_deliver_event_uses_proxy",
+    "test_refresh_access_token_ssl_context"
+  ],
+  "excluded_unrelated_tests": [
+    "test_compute_backoff_delay"
+  ]
+}

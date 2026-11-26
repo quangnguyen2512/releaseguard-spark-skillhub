@@ -1,0 +1,25 @@
+diff --git a/api_core/lifespan.py b/api_core/lifespan.py
+index 1111111..2222222 100644
+--- a/api_core/lifespan.py
++++ b/api_core/lifespan.py
+@@ -1,4 +1,4 @@
+-def register_lifespan_hooks(on_event=None, lifespan=None):
++def register_lifespan_hooks(lifespan=None):
+     if lifespan is None:
+-        return {"mode": on_event or "default", "active": False}
++        return {"mode": "default", "active": False}
+     return {"mode": "lifespan_ctx", "handler": lifespan, "active": True}
+diff --git a/api_core/params.py b/api_core/params.py
+index 1111111..2222222 100644
+--- a/api_core/params.py
++++ b/api_core/params.py
+@@ -1,6 +1,6 @@
+ import re
+ 
+ 
+-def build_query_validator(regex=None, max_length=64):
+-    compiled = re.compile(regex) if regex else None
+-    return {"regex": regex, "compiled": compiled, "max_length": max_length}
++def build_query_validator(pattern=None, max_length=64):
++    compiled = re.compile(pattern) if pattern else None
++    return {"pattern": pattern, "compiled": compiled, "max_length": max_length}

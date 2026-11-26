@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "app.py", line 15, in run
+    order = OrderService.create_order(data)
+  File "/home/project/services/order_service.py", line 28, in create_order
+    model.save()
+  File "/home/project/models/base.py", line 22, in save
+    self.validate(self._data)
+  File "/home/project/models/order.py", line 16, in validate
+    raise ValueError("amount 必须为正")
+ValueError: amount 必须为正

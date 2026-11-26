@@ -1,0 +1,979 @@
+{
+  "sample_id": "S01_httpx_0280",
+  "project": "encode/httpx",
+  "from_version": "0.27.2",
+  "to_version": "0.28.0",
+  "release_url": "https://github.com/encode/httpx/releases/tag/0.28.0",
+  "license": "BSD-3-Clause",
+  "release_lines": [
+    {
+      "line_id": "RN-1",
+      "line_num": 4,
+      "text": "Breaking: Removed the deprecated `proxies=...` parameter from `ClientSession.open_connection()` in `0.28.0`; migrate callers to `proxy=...` for single-URL proxy routing."
+    },
+    {
+      "line_id": "RN-2",
+      "line_num": 5,
+      "text": "Deprecated boolean/string `verify` shortcuts in `build_ssl_settings(verify=..., cert=...)` in favor of explicit `ssl.SSLContext` instances in `0.28.0`."
+    },
+    {
+      "line_id": "RN-3",
+      "line_num": 6,
+      "text": "Preserved default connection pool limits (`max_keepalive_connections=20`, `max_connections=100`) unchanged for synchronous HTTP transports."
+    },
+    {
+      "line_id": "RN-4",
+      "line_num": 7,
+      "text": "Fixed hexadecimal `nonce_count` formatting in `DigestAuth` retry challenges without changing public constructor arguments."
+    }
+  ],
+  "patch_diff_raw": "diff --git a/http_client/config.py b/http_client/config.py\nindex 1111111..2222222 100644\n--- a/http_client/config.py\n+++ b/http_client/config.py\n@@ -2,6 +2,8 @@\n \n \n def build_ssl_settings(verify=True, cert=None):\n+    if isinstance(verify, ssl.SSLContext):\n+        return verify\n     ctx = ssl.create_default_context()\n     if cert is not None:\n         ctx.load_cert_chain(cert)\ndiff --git a/http_client/transport.py b/http_client/transport.py\nindex 1111111..2222222 100644\n--- a/http_client/transport.py\n+++ b/http_client/transport.py\n@@ -5,6 +5,6 @@\n     def __init__(self, timeout=10.0):\n         self.timeout = timeout\n \n-    def open_connection(self, url, proxies=None, ssl_context=None):\n+    def open_connection(self, url, proxy=None, ssl_context=None):\n         ctx = build_ssl_settings(verify=ssl_context)\n-        return {\"url\": url, \"proxies\": proxies, \"ssl_ready\": ctx is not None, \"timeout\": self.timeout}\n+        return {\"url\": url, \"proxy\": proxy, \"ssl_ready\": ctx is not None, \"timeout\": self.timeout}\n",
+  "ground_truth": {
+    "sample_id": "S01_httpx_0280",
+    "project": "encode/httpx",
+    "from_version": "0.27.2",
+    "to_version": "0.28.0",
+    "release_url": "https://github.com/encode/httpx/releases/tag/0.28.0",
+    "license": "BSD-3-Clause",
+    "acceptance_criteria": [
+      "Must identify removal of proxies=... in favor of proxy=... as breaking=true with verbatim RN-1 quote.",
+      "Must identify deprecation of non-SSLContext verify/cert inputs in build_ssl_settings() as breaking=false (deprecation) grounded in RN-2.",
+      "Must NOT mark RN-3 (max_keepalive_connections=20, max_connections=100 unchanged) or RN-4 (DigestAuth bugfix) as breaking=true.",
+      "Must trace changed symbols http_client/transport.py::ClientSession::open_connection and http_client/config.py::build_ssl_settings to downstream features WebhookDispatcher.deliver_event and refresh_access_token.",
+      "Must select regression tests test_deliver_event_uses_proxy and test_refresh_access_token_ssl_context while excluding unrelated test_compute_backoff_delay."
+    ],
+    "expected_breaking_line_ids": [
+      "RN-1"
+    ],
+    "non_breaking_trap_line_ids": [
+      "RN-2",
+      "RN-3",
+      "RN-4"
+    ],
+    "must_include_tokens": [
+      "0.28.0",
+      "proxies",
+      "proxy",
+      "SSLContext"
+    ],
+    "expected_changed_files": [
+      "http_client/config.py",
+      "http_client/transport.py"
+    ],
+    "expected_seed_nodes": [
+      "http_client/config.py::build_ssl_settings",
+      "http_client/transport.py::ClientSession::open_connection"
+    ],
+    "expected_affected_callers": [
+      "services/webhook_sender.py::WebhookDispatcher::deliver_event",
+      "services/oauth_fetcher.py::refresh_access_token"
+    ],
+    "expected_selected_tests": [
+      "test_deliver_event_uses_proxy",
+      "test_refresh_access_token_ssl_context"
+    ],
+    "excluded_unrelated_tests": [
+      "test_compute_backoff_delay"
+    ]
+  },
+  "changeradar": {
+    "cache": {
+      "schema_version": "1.0",
+      "tool": "cache",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "cached": false,
+        "root_hash": "4d0508ede2dfb9cf0bacba4fe1e100dc8fe2133c3bc76a1a0ca52145578c46a4",
+        "changed_files": [],
+        "added_files": [],
+        "deleted_files": [
+          "http_client/__init__.py",
+          "http_client/config.py",
+          "http_client/transport.py",
+          "services/__init__.py",
+          "services/oauth_fetcher.py",
+          "services/retry_backoff.py",
+          "services/webhook_sender.py",
+          "tests/__init__.py",
+          "tests/test_oauth_fetcher.py",
+          "tests/test_retry_backoff.py",
+          "tests/test_webhook_sender.py"
+        ],
+        "rebuild_scope": "full"
+      }
+    },
+    "callgraph": {
+      "schema_version": "1.0",
+      "tool": "callgraph",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "root": "workspaces\\spark_x26_skillhub_100usd\\data\\samples\\S01_httpx_0280\\repo",
+        "stats": {
+          "files": 11,
+          "nodes": 23,
+          "edges": 10,
+          "parse_failures": 0,
+          "classes": 2,
+          "dynamic_modules": 0
+        },
+        "nodes": [
+          {
+            "id": "http_client/config.py::<module>",
+            "name": "http_client/config.py",
+            "kind": "module",
+            "file": "http_client/config.py",
+            "line_range": [
+              1,
+              10
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "http_client/config.py::build_ssl_settings",
+            "name": "build_ssl_settings",
+            "kind": "function",
+            "file": "http_client/config.py",
+            "line_range": [
+              4,
+              10
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "http_client/transport.py::<module>",
+            "name": "http_client/transport.py",
+            "kind": "module",
+            "file": "http_client/transport.py",
+            "line_range": [
+              1,
+              10
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "http_client/transport.py::ClientSession",
+            "name": "ClientSession",
+            "kind": "class",
+            "file": "http_client/transport.py",
+            "line_range": [
+              4,
+              10
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "bases": null,
+            "is_test": null
+          },
+          {
+            "id": "http_client/transport.py::ClientSession::__init__",
+            "name": "__init__",
+            "kind": "method",
+            "file": "http_client/transport.py",
+            "line_range": [
+              5,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "class": "http_client/transport.py::ClientSession",
+            "is_test": null
+          },
+          {
+            "id": "http_client/transport.py::ClientSession::open_connection",
+            "name": "open_connection",
+            "kind": "method",
+            "file": "http_client/transport.py",
+            "line_range": [
+              8,
+              10
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "class": "http_client/transport.py::ClientSession",
+            "is_test": null
+          },
+          {
+            "id": "http_client/__init__.py::<module>",
+            "name": "http_client/__init__.py",
+            "kind": "module",
+            "file": "http_client/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "services/oauth_fetcher.py::<module>",
+            "name": "services/oauth_fetcher.py",
+            "kind": "module",
+            "file": "services/oauth_fetcher.py",
+            "line_range": [
+              1,
+              8
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "services/oauth_fetcher.py::refresh_access_token",
+            "name": "refresh_access_token",
+            "kind": "function",
+            "file": "services/oauth_fetcher.py",
+            "line_range": [
+              5,
+              8
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "services/retry_backoff.py::<module>",
+            "name": "services/retry_backoff.py",
+            "kind": "module",
+            "file": "services/retry_backoff.py",
+            "line_range": [
+              1,
+              2
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "services/retry_backoff.py::compute_backoff_delay",
+            "name": "compute_backoff_delay",
+            "kind": "function",
+            "file": "services/retry_backoff.py",
+            "line_range": [
+              1,
+              2
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "services/webhook_sender.py::<module>",
+            "name": "services/webhook_sender.py",
+            "kind": "module",
+            "file": "services/webhook_sender.py",
+            "line_range": [
+              1,
+              9
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "services/webhook_sender.py::WebhookDispatcher",
+            "name": "WebhookDispatcher",
+            "kind": "class",
+            "file": "services/webhook_sender.py",
+            "line_range": [
+              4,
+              9
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "bases": null,
+            "is_test": null
+          },
+          {
+            "id": "services/webhook_sender.py::WebhookDispatcher::__init__",
+            "name": "__init__",
+            "kind": "method",
+            "file": "services/webhook_sender.py",
+            "line_range": [
+              5,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "class": "services/webhook_sender.py::WebhookDispatcher",
+            "is_test": null
+          },
+          {
+            "id": "services/webhook_sender.py::WebhookDispatcher::deliver_event",
+            "name": "deliver_event",
+            "kind": "method",
+            "file": "services/webhook_sender.py",
+            "line_range": [
+              8,
+              9
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "class": "services/webhook_sender.py::WebhookDispatcher",
+            "is_test": null
+          },
+          {
+            "id": "services/__init__.py::<module>",
+            "name": "services/__init__.py",
+            "kind": "module",
+            "file": "services/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "tests/test_oauth_fetcher.py::<module>",
+            "name": "tests/test_oauth_fetcher.py",
+            "kind": "module",
+            "file": "tests/test_oauth_fetcher.py",
+            "line_range": [
+              1,
+              8
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_oauth_fetcher.py::test_refresh_access_token_ssl_context",
+            "name": "test_refresh_access_token_ssl_context",
+            "kind": "function",
+            "file": "tests/test_oauth_fetcher.py",
+            "line_range": [
+              5,
+              8
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_retry_backoff.py::<module>",
+            "name": "tests/test_retry_backoff.py",
+            "kind": "module",
+            "file": "tests/test_retry_backoff.py",
+            "line_range": [
+              1,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_retry_backoff.py::test_compute_backoff_delay",
+            "name": "test_compute_backoff_delay",
+            "kind": "function",
+            "file": "tests/test_retry_backoff.py",
+            "line_range": [
+              4,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_webhook_sender.py::<module>",
+            "name": "tests/test_webhook_sender.py",
+            "kind": "module",
+            "file": "tests/test_webhook_sender.py",
+            "line_range": [
+              1,
+              7
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_webhook_sender.py::test_deliver_event_uses_proxy",
+            "name": "test_deliver_event_uses_proxy",
+            "kind": "function",
+            "file": "tests/test_webhook_sender.py",
+            "line_range": [
+              4,
+              7
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/__init__.py::<module>",
+            "name": "tests/__init__.py",
+            "kind": "module",
+            "file": "tests/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          }
+        ],
+        "edges": [
+          {
+            "from": "http_client/transport.py::ClientSession::open_connection",
+            "to": "http_client/config.py::build_ssl_settings",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "http_client/transport.py",
+              "line": 9
+            }
+          },
+          {
+            "from": "services/oauth_fetcher.py::refresh_access_token",
+            "to": "http_client/config.py::build_ssl_settings",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "services/oauth_fetcher.py",
+              "line": 6
+            }
+          },
+          {
+            "from": "services/oauth_fetcher.py::refresh_access_token",
+            "to": "http_client/transport.py::ClientSession::__init__",
+            "type": "constructor",
+            "confidence": "exact",
+            "site": {
+              "file": "services/oauth_fetcher.py",
+              "line": 7
+            }
+          },
+          {
+            "from": "services/oauth_fetcher.py::refresh_access_token",
+            "to": "http_client/transport.py::ClientSession::open_connection",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "services/oauth_fetcher.py",
+              "line": 8
+            }
+          },
+          {
+            "from": "services/webhook_sender.py::WebhookDispatcher::__init__",
+            "to": "http_client/transport.py::ClientSession::__init__",
+            "type": "constructor",
+            "confidence": "exact",
+            "site": {
+              "file": "services/webhook_sender.py",
+              "line": 6
+            }
+          },
+          {
+            "from": "services/webhook_sender.py::WebhookDispatcher::deliver_event",
+            "to": "http_client/transport.py::ClientSession::open_connection",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "services/webhook_sender.py",
+              "line": 9
+            }
+          },
+          {
+            "from": "tests/test_oauth_fetcher.py::test_refresh_access_token_ssl_context",
+            "to": "services/oauth_fetcher.py::refresh_access_token",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_oauth_fetcher.py",
+              "line": 7
+            }
+          },
+          {
+            "from": "tests/test_retry_backoff.py::test_compute_backoff_delay",
+            "to": "services/retry_backoff.py::compute_backoff_delay",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_retry_backoff.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "tests/test_webhook_sender.py::test_deliver_event_uses_proxy",
+            "to": "services/webhook_sender.py::WebhookDispatcher::__init__",
+            "type": "constructor",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_webhook_sender.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "tests/test_webhook_sender.py::test_deliver_event_uses_proxy",
+            "to": "services/webhook_sender.py::WebhookDispatcher::deliver_event",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_webhook_sender.py",
+              "line": 6
+            }
+          }
+        ]
+      }
+    },
+    "diffparse": {
+      "schema_version": "1.0",
+      "tool": "diffparse",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "mode": "diff",
+        "changes": [
+          {
+            "file": "http_client/config.py",
+            "change_type": "modified",
+            "lines": [
+              [
+                5,
+                6
+              ]
+            ],
+            "functions": [
+              {
+                "name": "build_ssl_settings",
+                "node_id": "http_client/config.py::build_ssl_settings",
+                "line_range": [
+                  4,
+                  10
+                ]
+              }
+            ],
+            "unmapped_lines": []
+          },
+          {
+            "file": "http_client/transport.py",
+            "change_type": "modified",
+            "lines": [
+              [
+                8,
+                8
+              ],
+              [
+                10,
+                10
+              ]
+            ],
+            "functions": [
+              {
+                "name": "open_connection",
+                "node_id": "http_client/transport.py::ClientSession::open_connection",
+                "line_range": [
+                  8,
+                  10
+                ]
+              }
+            ],
+            "unmapped_lines": []
+          }
+        ],
+        "commits": []
+      }
+    },
+    "propagate": {
+      "schema_version": "1.0",
+      "tool": "propagate",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "seeds": [
+          "http_client/config.py::build_ssl_settings",
+          "http_client/transport.py::ClientSession::open_connection"
+        ],
+        "impact": [
+          {
+            "node_id": "http_client/config.py::build_ssl_settings",
+            "distance": 0,
+            "path": [
+              "http_client/config.py::build_ssl_settings"
+            ],
+            "fan_in": 2,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": true
+          },
+          {
+            "node_id": "http_client/transport.py::ClientSession::open_connection",
+            "distance": 0,
+            "path": [
+              "http_client/transport.py::ClientSession::open_connection"
+            ],
+            "fan_in": 2,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": true
+          },
+          {
+            "node_id": "services/oauth_fetcher.py::refresh_access_token",
+            "distance": 1,
+            "path": [
+              "http_client/config.py::build_ssl_settings",
+              "services/oauth_fetcher.py::refresh_access_token"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": false
+          },
+          {
+            "node_id": "services/webhook_sender.py::WebhookDispatcher::deliver_event",
+            "distance": 1,
+            "path": [
+              "http_client/transport.py::ClientSession::open_connection",
+              "services/webhook_sender.py::WebhookDispatcher::deliver_event"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": false
+          }
+        ],
+        "hubs": [],
+        "truncation": {
+          "max_distance": 3,
+          "fanin_cap": 50,
+          "hit_distance_cap": 0,
+          "hit_fanin_cap": 0
+        },
+        "module_fallback": [],
+        "confidence_distribution": {
+          "exact": 4,
+          "conservative": 0,
+          "unknown": 0
+        }
+      }
+    },
+    "testselect": {
+      "schema_version": "1.0",
+      "tool": "testselect",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "tests": [
+          {
+            "test_file": "test_oauth_fetcher.py",
+            "test_name": "test_refresh_access_token_ssl_context",
+            "node_id": [
+              "services/oauth_fetcher.py::refresh_access_token"
+            ],
+            "coupling_score": 1.0,
+            "coupling_basis": [
+              "direct_call"
+            ],
+            "covers": [
+              "services/oauth_fetcher.py::refresh_access_token"
+            ],
+            "risk_level": "high"
+          },
+          {
+            "test_file": "test_webhook_sender.py",
+            "test_name": "test_deliver_event_uses_proxy",
+            "node_id": [
+              "services/webhook_sender.py::WebhookDispatcher::deliver_event"
+            ],
+            "coupling_score": 1.0,
+            "coupling_basis": [
+              "direct_call"
+            ],
+            "covers": [
+              "services/webhook_sender.py::WebhookDispatcher::deliver_event"
+            ],
+            "risk_level": "high"
+          }
+        ],
+        "metrics": {
+          "total_tests": 3,
+          "selected": 2,
+          "compression_ratio": 0.667,
+          "impact_coverage": 0.5
+        }
+      }
+    },
+    "changed_files": [
+      "http_client/config.py",
+      "http_client/transport.py"
+    ],
+    "seed_nodes": [
+      "http_client/config.py::build_ssl_settings",
+      "http_client/transport.py::ClientSession::open_connection"
+    ],
+    "affected_callers": [
+      "services/oauth_fetcher.py::refresh_access_token",
+      "services/webhook_sender.py::WebhookDispatcher::deliver_event"
+    ],
+    "all_impact_nodes": [
+      "http_client/config.py::build_ssl_settings",
+      "http_client/transport.py::ClientSession::open_connection",
+      "services/oauth_fetcher.py::refresh_access_token",
+      "services/webhook_sender.py::WebhookDispatcher::deliver_event"
+    ],
+    "selected_tests": [
+      {
+        "test_file": "test_oauth_fetcher.py",
+        "test_name": "test_refresh_access_token_ssl_context",
+        "node_id": [
+          "services/oauth_fetcher.py::refresh_access_token"
+        ],
+        "coupling_score": 1.0,
+        "coupling_basis": [
+          "direct_call"
+        ],
+        "covers": [
+          "services/oauth_fetcher.py::refresh_access_token"
+        ],
+        "risk_level": "high"
+      },
+      {
+        "test_file": "test_webhook_sender.py",
+        "test_name": "test_deliver_event_uses_proxy",
+        "node_id": [
+          "services/webhook_sender.py::WebhookDispatcher::deliver_event"
+        ],
+        "coupling_score": 1.0,
+        "coupling_basis": [
+          "direct_call"
+        ],
+        "covers": [
+          "services/webhook_sender.py::WebhookDispatcher::deliver_event"
+        ],
+        "risk_level": "high"
+      }
+    ],
+    "total_tests": 3,
+    "compression_ratio": 0.667,
+    "impact_coverage": 0.5
+  },
+  "prompt_messages": [
+    {
+      "role": "system",
+      "content": "You are ReleaseGuard on Spark-X2.6-4B, guided by SkillHub skill `global/changeradar` (v20260809.064909).\nRules:\n1. NEVER invent call-graph node IDs, changed files, or test names; use ONLY values from `changeradar_json`.\n2. NEVER invent version numbers, percentages, dates, owners, CLI flags, or CVEs absent from `RN-1..RN-N` or `git_diff`.\n3. Output 1 item per `RN-k` (`CHK-1..CHK-N`). `verbatim_quote` MUST be an exact single-line substring copied from `[RN-k]` (20-55 chars). Keep `title` and `action` concise (<12 words).\n4. `breaking:true` ONLY when `[RN-k]` starts with `Breaking` or says `Removed the deprecated`. Deprecations, `Behavior change:`, additive features, opt-in flags, speedups, unchanged bounds, docstrings, and future notes MUST have `breaking:false`.\n5. If `[RN-k]` mentions no owner / no target release date / future discussion, set `breaking:false` and `uncertainty_note:\"No owner or target date set\"`.\n6. Output single-line minified JSON only (no markdown fences, no newlines)."
+    },
+    {
+      "role": "user",
+      "content": "Upgrade `encode/httpx` `0.27.2`->`0.28.0` (`data/samples/S01_httpx_0280/repo`)\nNotes:\n[RN-1] Breaking: Removed the deprecated `proxies=...` parameter from `ClientSession.open_connection()` in `0.28.0`; migrate callers to `proxy=...` for single-URL proxy routing.\n[RN-2] Deprecated boolean/string `verify` shortcuts in `build_ssl_settings(verify=..., cert=...)` in favor of explicit `ssl.SSLContext` instances in `0.28.0`.\n[RN-3] Preserved default connection pool limits (`max_keepalive_connections=20`, `max_connections=100`) unchanged for synchronous HTTP transports.\n[RN-4] Fixed hexadecimal `nonce_count` formatting in `DigestAuth` retry challenges without changing public constructor arguments.\nDiff:\ndiff --git a/http_client/config.py b/http_client/config.py\nindex 1111111..2222222 100644\n--- a/http_client/config.py\n+++ b/http_client/config.py\n@@ -2,6 +2,8 @@\n \n \n def build_ssl_settings(verify=True, cert=None):\n+    if isinstance(verify, ssl.SSLContext):\n+        return verify\n     ctx = ssl.create_default_context()\n     if cert is not None:\n         ctx.load_cert_chain(cert)\ndiff --git a/http_client/transport.py b/http_client/transport.py\nindex 1111111..2222222 100644\n--- a/http_client/transport.py\n+++ b/http_client/transport.py\n@@ -5,6 +5,6 @@\n     def __init__(self, timeout=10.0):\n         self.timeout = timeout\n \n-    def open_connection(self, url, proxies=None, ssl_context=None):\n+    def open_connection(self, url, proxy=None, ssl_context=None):\n         ctx = build_ssl_settings(verify=ssl_context)\n-        return {\"url\": url, \"proxies\": proxies, \"ssl_ready\": ctx is not None, \"timeout\": self.timeout}\n+        return {\"url\": url, \"proxy\": proxy, \"ssl_ready\": ctx is not None, \"timeout\": self.timeout}\nchangeradar_json:\n{\"changed_files\":[\"http_client/config.py\",\"http_client/transport.py\"],\"seeds\":[\"http_client/config.py::build_ssl_settings\",\"http_client/transport.py::ClientSession::open_connection\"],\"callers\":[{\"id\":\"services/oauth_fetcher.py::refresh_access_token\",\"via\":\"http_client/transport.py::ClientSession::open_connection\"},{\"id\":\"services/webhook_sender.py::WebhookDispatcher::deliver_event\",\"via\":\"http_client/transport.py::ClientSession::open_connection\"}],\"tests\":[{\"name\":\"test_refresh_access_token_ssl_context\",\"covers\":[\"services/oauth_fetcher.py::refresh_access_token\"]},{\"name\":\"test_deliver_event_uses_proxy\",\"covers\":[\"services/webhook_sender.py::WebhookDispatcher::deliver_event\"]}]}\nOutput minified JSON for RN-1..RN-4:\n{\"step0\":{\"schema_version\":\"1.0\",\"mode\":\"diff\",\"target\":{\"path\":\"data/samples/S01_httpx_0280/repo\",\"tests_dir\":\"data/samples/S01_httpx_0280/repo/tests\"},\"scope\":{\"diff_file\":\"patch.diff\"},\"confidence\":\"high\",\"clarification_needed\":[]},\"items\":[{\"id\":\"CHK-1\",\"title\":\"concise title\",\"action\":\"concise action\",\"breaking\":true,\"severity\":\"breaking|behavior_change|deprecation|additive\",\"release_note_line_id\":\"RN-1\",\"verbatim_quote\":\"exact 20-55 char substring of RN-1\",\"version_or_flag_tokens\":[\"0.28.0\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"file_or_null\",\"changed_symbol\":\"seed_or_null\",\"affected_features\":[\"caller_id\"],\"recommended_tests\":[\"test_name\"]}}]}\nInclude all required source tokens `['0.28.0', 'proxies', 'proxy', 'SSLContext']` across `version_or_flag_tokens` where mentioned in Notes. If an RN line matches no seed, use `null` and `[]` in `traced_change`."
+    }
+  ],
+  "inference": {
+    "backend": "openai_compat (http://127.0.0.1:18080/v1)",
+    "is_dry_run": false,
+    "model_id": "Spark-X2.6-4B-Q4_K_M",
+    "model_revision": "9d716770ac7477776de5f891f70cdf98b003a5cd",
+    "quantization_or_dtype": "Q4_K_M",
+    "thinking_mode": "none",
+    "raw_text": "{\"step0\":{\"schema_version\":\"1.0\",\"mode\":\"diff\",\"target\":{\"path\":\"data/samples/S01_httpx_0280/repo\",\"tests_dir\":\"data/samples/S01_httpx_0280/repo/tests\"},\"scope\":{\"diff_file\":\"patch.diff\"},\"confidence\":\"high\",\"clarification_needed\":[]},\"items\":[{\"id\":\"CHK-1\",\"title\":\"Removed proxies param from open_connection\",\"action\":\"migrate callers to proxy= for single-URL proxy routing\",\"breaking\":true,\"severity\":\"breaking\",\"release_note_line_id\":\"RN-1\",\"verbatim_quote\":\"Removed the deprecated `proxies=...` parameter from `ClientSession.open_connection()` in `0.28.0`\",\"version_or_flag_tokens\":[\"0.28.0\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"http_client/transport.py\",\"changed_symbol\":\"ClientSession::open_connection\",\"affected_features\":[\"services/oauth_fetcher.py::refresh_access_token\",\"services/webhook_sender.py::WebhookDispatcher::deliver_event\"],\"recommended_tests\":[\"test_refresh_access_token_ssl_context\",\"test_deliver_event_uses_proxy\"]}},{\"id\":\"CHK-2\",\"title\":\"Deprecated verify shortcuts in build_ssl_settings\",\"action\":\"use explicit ssl.SSLContext instances\",\"breaking\":false,\"severity\":\"deprecation\",\"release_note_line_id\":\"RN-2\",\"verbatim_quote\":\"Deprecated boolean/string `verify` shortcuts in `build_ssl_settings(verify=..., cert=...)` in `0.28.0`\",\"version_or_flag_tokens\":[\"0.28.0\",\"SSLContext\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"http_client/config.py\",\"changed_symbol\":\"build_ssl_settings\",\"affected_features\":[],\"recommended_tests\":[]}},{\"id\":\"CHK-3\",\"title\":\"Preserved default connection pool limits unchanged\",\"action\":\"no change to max_keepalive_connections or max_connections\",\"breaking\":false,\"severity\":\"behavior_change\",\"release_note_line_id\":\"RN-3\",\"verbatim_quote\":\"Preserved default connection pool limits (`max_keepalive_connections=20`, `max_connections=100`) unchanged for synchronous HTTP transports.\",\"version_or_flag_tokens\":[],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":null,\"changed_symbol\":null,\"affected_features\":[],\"recommended_tests\":[]}},{\"id\":\"CHK-4\",\"title\":\"Fixed nonce_count hexadecimal formatting in DigestAuth\",\"action\":\"no change to public constructor arguments\",\"breaking\":false,\"severity\":\"behavior_change\",\"release_note_line_id\":\"RN-4\",\"verbatim_quote\":\"Fixed hexadecimal `nonce_count` formatting in `DigestAuth` retry challenges without changing public constructor arguments.\",\"version_or_flag_tokens\":[],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":null,\"changed_symbol\":null,\"affected_features\":[],\"recommended_tests\":[]}}]}",
+    "latency_ms": 422508.22,
+    "prompt_tokens": null,
+    "completion_tokens": 691,
+    "inference_settings": {
+      "api_base": "http://127.0.0.1:18080/v1",
+      "temperature": 0.0,
+      "top_p": 0.95,
+      "max_tokens": 900,
+      "stream": true,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  },
+  "step0_contract": {
+    "schema_version": "1.0",
+    "mode": "diff",
+    "target": {
+      "path": "data/samples/S01_httpx_0280/repo",
+      "tests_dir": "data/samples/S01_httpx_0280/repo/tests"
+    },
+    "scope": {
+      "diff_file": "patch.diff"
+    },
+    "confidence": "high",
+    "clarification_needed": []
+  },
+  "thinking_trace": "",
+  "checklist_items": [
+    {
+      "id": "CHK-1",
+      "title": "Removed proxies param from open_connection",
+      "action": "migrate callers to proxy= for single-URL proxy routing",
+      "breaking": true,
+      "severity": "breaking",
+      "release_note_line_id": "RN-1",
+      "verbatim_quote": "Removed the deprecated `proxies=...` parameter from `ClientSession.open_connection()` in `0.28.0`",
+      "version_or_flag_tokens": [
+        "0.28.0"
+      ],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": "http_client/transport.py",
+        "changed_symbol": "http_client/transport.py::ClientSession::open_connection",
+        "affected_features": [
+          "services/oauth_fetcher.py::refresh_access_token",
+          "services/webhook_sender.py::WebhookDispatcher::deliver_event"
+        ],
+        "recommended_tests": [
+          "test_refresh_access_token_ssl_context",
+          "test_deliver_event_uses_proxy"
+        ]
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-2",
+      "title": "Deprecated verify shortcuts in build_ssl_settings",
+      "action": "use explicit ssl.SSLContext instances",
+      "breaking": false,
+      "severity": "deprecation",
+      "release_note_line_id": "RN-2",
+      "verbatim_quote": "Deprecated boolean/string `verify` shortcuts in `build_ssl_settings(verify=..., cert=...)` in `0.28.0`",
+      "version_or_flag_tokens": [
+        "0.28.0",
+        "SSLContext"
+      ],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": "http_client/config.py",
+        "changed_symbol": "http_client/config.py::build_ssl_settings",
+        "affected_features": [],
+        "recommended_tests": []
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-3",
+      "title": "Preserved default connection pool limits unchanged",
+      "action": "no change to max_keepalive_connections or max_connections",
+      "breaking": false,
+      "severity": "behavior_change",
+      "release_note_line_id": "RN-3",
+      "verbatim_quote": "Preserved default connection pool limits (`max_keepalive_connections=20`, `max_connections=100`) unchanged for synchronous HTTP transports.",
+      "version_or_flag_tokens": [],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": null,
+        "changed_symbol": null,
+        "affected_features": [],
+        "recommended_tests": []
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-4",
+      "title": "Fixed nonce_count hexadecimal formatting in DigestAuth",
+      "action": "no change to public constructor arguments",
+      "breaking": false,
+      "severity": "behavior_change",
+      "release_note_line_id": "RN-4",
+      "verbatim_quote": "Fixed hexadecimal `nonce_count` formatting in `DigestAuth` retry challenges without changing public constructor arguments.",
+      "version_or_flag_tokens": [],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": null,
+        "changed_symbol": null,
+        "affected_features": [],
+        "recommended_tests": []
+      },
+      "review_status": "pending"
+    }
+  ],
+  "verification": {
+    "sample_id": "S01_httpx_0280",
+    "all_gates_passed": false,
+    "gates": [
+      {
+        "gate_id": "G1",
+        "name": "Schema & Step-0 Contract Gate",
+        "passed": true,
+        "summary": "Validated Step-0 contract and 4 checklist item(s).",
+        "violations": []
+      },
+      {
+        "gate_id": "G2",
+        "name": "Verbatim Release-Note Quote Gate",
+        "passed": false,
+        "summary": "3/4 quotes verified verbatim against single source lines.",
+        "violations": [
+          "CHK-2: verbatim_quote is NOT an exact substring of [RN-2]: 'Deprecated boolean/string `verify` shortcuts in `build_ssl_settings(verify=..., cert=...)` in `0.28.0`'"
+        ]
+      },
+      {
+        "gate_id": "G3",
+        "name": "Zero-Invented Version, Number & Flag Gate",
+        "passed": true,
+        "summary": "All version numbers, metrics, CVEs, and flags grounded in source/diff.",
+        "violations": []
+      },
+      {
+        "gate_id": "G4",
+        "name": "Diff File & Seed Symbol Grounding Gate",
+        "passed": true,
+        "summary": "Every traced file and changed symbol matches `diffparse.py` / `propagate.py` seeds.",
+        "violations": []
+      },
+      {
+        "gate_id": "G5",
+        "name": "ChangeRadar Call-Graph & Test Red-Line Gate",
+        "passed": true,
+        "summary": "100% of traced downstream callers and regression tests verified against `changeradar` AST JSON.",
+        "violations": []
+      },
+      {
+        "gate_id": "G6",
+        "name": "Breaking Polarity & Uncertainty Preservation Gate",
+        "passed": true,
+        "summary": "Breaking polarity and unscheduled-item uncertainty preserved accurately.",
+        "violations": []
+      },
+      {
+        "gate_id": "G7",
+        "name": "Pre-Committed Gold Acceptance Criteria Gate",
+        "passed": true,
+        "summary": "Breaking match=True, seed_recall=100%, caller_recall=100%, test_exact=True.",
+        "violations": []
+      }
+    ],
+    "verified_items_count": 3,
+    "total_items_count": 4,
+    "breaking_precision_match": true,
+    "seed_trace_recall": 1.0,
+    "caller_trace_recall": 1.0,
+    "test_selection_exact": true
+  }
+}

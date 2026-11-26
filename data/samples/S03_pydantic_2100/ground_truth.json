@@ -1,0 +1,46 @@
+{
+  "sample_id": "S03_pydantic_2100",
+  "project": "pydantic/pydantic",
+  "from_version": "2.9.2",
+  "to_version": "2.10.0",
+  "release_url": "https://github.com/pydantic/pydantic/releases/tag/v2.10.0",
+  "license": "MIT",
+  "acceptance_criteria": [
+    "Must mark allow_mutation removal in compile_model_config() (use frozen=True) as breaking=true grounded in RN-1.",
+    "Must trace compile_model_config() to billing/ledger_writer.py::append_immutable_entry and dump_audit_record() to billing/invoice_exporter.py::export_invoice_json.",
+    "Must NOT mark RN-3 (opt-in experimental_allow_partial disabled by default) or RN-4 (18% speed improvement) as breaking=true.",
+    "Must preserve exact numbers (v2.10.0, +00:00, 18%) without inventing new metrics."
+  ],
+  "expected_breaking_line_ids": [
+    "RN-1"
+  ],
+  "non_breaking_trap_line_ids": [
+    "RN-2",
+    "RN-3",
+    "RN-4"
+  ],
+  "must_include_tokens": [
+    "v2.10.0",
+    "allow_mutation",
+    "frozen=True"
+  ],
+  "expected_changed_files": [
+    "validation/schema_config.py",
+    "validation/serializer.py"
+  ],
+  "expected_seed_nodes": [
+    "validation/schema_config.py::compile_model_config",
+    "validation/serializer.py::dump_audit_record"
+  ],
+  "expected_affected_callers": [
+    "billing/ledger_writer.py::append_immutable_entry",
+    "billing/invoice_exporter.py::export_invoice_json"
+  ],
+  "expected_selected_tests": [
+    "test_append_immutable_entry_frozen",
+    "test_export_invoice_json_preserves_tz"
+  ],
+  "excluded_unrelated_tests": [
+    "test_cents_to_dollars"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "sample_id": "S05_requests_2322",
+  "project": "psf/requests + urllib3",
+  "from_version": "2.31.0",
+  "to_version": "2.32.2",
+  "release_url": "https://github.com/psf/requests/releases/tag/v2.32.2",
+  "license": "Apache-2.0",
+  "acceptance_criteria": [
+    "Must mark CVE-2024-35195 (verify pool key in get_connection_with_tls_context) and CVE-2024-37891 (Proxy-Authorization stripping across redirects) as breaking=true security changes grounded in RN-1 and RN-2.",
+    "Must trace TLSAdapter.get_connection_with_tls_context to clients/artifact_fetcher.py::download_release_tarball and strip_sensitive_redirect_headers to clients/mirror_sync.py::follow_mirror_redirect.",
+    "Must NOT mark RN-3 (unchanged idna/certifi dependency bounds) or RN-4 (docstring update) as breaking=true."
+  ],
+  "expected_breaking_line_ids": [
+    "RN-1",
+    "RN-2"
+  ],
+  "non_breaking_trap_line_ids": [
+    "RN-3",
+    "RN-4"
+  ],
+  "must_include_tokens": [
+    "CVE-2024-35195",
+    "CVE-2024-37891",
+    "Proxy-Authorization",
+    "v2.32.2"
+  ],
+  "expected_changed_files": [
+    "net_transport/adapters.py",
+    "net_transport/redirects.py"
+  ],
+  "expected_seed_nodes": [
+    "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context",
+    "net_transport/redirects.py::strip_sensitive_redirect_headers"
+  ],
+  "expected_affected_callers": [
+    "clients/artifact_fetcher.py::download_release_tarball",
+    "clients/mirror_sync.py::follow_mirror_redirect"
+  ],
+  "expected_selected_tests": [
+    "test_download_release_tarball_verify_key",
+    "test_follow_mirror_redirect_strips_proxy_auth"
+  ],
+  "excluded_unrelated_tests": [
+    "test_parse_cookie_pair"
+  ]
+}

@@ -1,0 +1,9 @@
+# Core ReleaseGuard pipeline & SkillHub global/changeradar run on Python 3.10+ stdlib!
+# Testing
+pytest>=8.0.0
+
+# Optional: Local Hugging Face Transformers backend (only needed for --backend transformers)
+# transformers==4.57.1
+# torch>=2.4.0
+# accelerate>=0.34.0
+# huggingface_hub>=0.26.0

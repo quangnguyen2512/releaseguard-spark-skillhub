@@ -1,0 +1,84 @@
+{
+  "impact_recall": 1.0,
+  "compression": 0.4286,
+  "kill_retention": 1.0,
+  "convergence": 0.1042,
+  "detail": {
+    "total_tests": 7,
+    "selected": 4,
+    "impact_nodes": 5,
+    "total_nodes": 48,
+    "covered_funcs": [
+      "total",
+      "validate"
+    ],
+    "missed_funcs": [],
+    "mutants_total": 7,
+    "kill_rate_full": 0.5714,
+    "kill_rate_selected": 0.5714,
+    "selected_test_names": [
+      "test_create_order",
+      "test_order_total",
+      "test_order_validate",
+      "test_user_save"
+    ],
+    "mutation_details": [
+      {
+        "file": "models/order.py",
+        "func": "total",
+        "operator": "mutate_return",
+        "desc": "return val->not @line21",
+        "killed_by_full": true,
+        "killed_by_selected": true
+      },
+      {
+        "file": "models/order.py",
+        "func": "total",
+        "operator": "mutate_const",
+        "desc": "const str->\"\" @line20",
+        "killed_by_full": false,
+        "killed_by_selected": false
+      },
+      {
+        "file": "models/order.py",
+        "func": "validate",
+        "operator": "flip_compare",
+        "desc": "flip LtE->Gt @line15",
+        "killed_by_full": true,
+        "killed_by_selected": true
+      },
+      {
+        "file": "models/order.py",
+        "func": "validate",
+        "operator": "mutate_return",
+        "desc": "return bool negate @line17",
+        "killed_by_full": true,
+        "killed_by_selected": true
+      },
+      {
+        "file": "models/order.py",
+        "func": "validate",
+        "operator": "drop_call",
+        "desc": "drop call @line14",
+        "killed_by_full": false,
+        "killed_by_selected": false
+      },
+      {
+        "file": "models/order.py",
+        "func": "validate",
+        "operator": "mutate_const",
+        "desc": "const str->\"\" @line13",
+        "killed_by_full": false,
+        "killed_by_selected": false
+      },
+      {
+        "file": "models/order.py",
+        "func": "validate",
+        "operator": "negate_if",
+        "desc": "negate if @line15",
+        "killed_by_full": true,
+        "killed_by_selected": true
+      }
+    ]
+  }
+}

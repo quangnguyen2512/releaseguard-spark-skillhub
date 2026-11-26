@@ -1,0 +1,870 @@
+{
+  "sample_id": "S03_pydantic_2100",
+  "project": "pydantic/pydantic",
+  "from_version": "2.9.2",
+  "to_version": "2.10.0",
+  "release_url": "https://github.com/pydantic/pydantic/releases/tag/v2.10.0",
+  "license": "MIT",
+  "release_lines": [
+    {
+      "line_id": "RN-1",
+      "line_num": 4,
+      "text": "Breaking: Passing `allow_mutation` inside `compile_model_config()` in `v2.10.0` now raises `ValueError(\"allow_mutation is removed; use frozen=True\")` instead of a deprecation warning."
+    },
+    {
+      "line_id": "RN-2",
+      "line_num": 5,
+      "text": "Behavior change: `dump_audit_record()` now preserves explicit UTC/offset suffixes on timezone-aware ISO-8601 timestamps rather than stripping `+00:00`."
+    },
+    {
+      "line_id": "RN-3",
+      "line_num": 6,
+      "text": "Added opt-in `experimental_allow_partial=\"trailing-strings\"` streaming flag (disabled by default; no impact on standard validation)."
+    },
+    {
+      "line_id": "RN-4",
+      "line_num": 7,
+      "text": "Accelerated union schema compilation by `18%` with byte-identical JSON Schema output."
+    }
+  ],
+  "patch_diff_raw": "diff --git a/validation/schema_config.py b/validation/schema_config.py\nindex 1111111..2222222 100644\n--- a/validation/schema_config.py\n+++ b/validation/schema_config.py\n@@ -1,4 +1,4 @@\n def compile_model_config(config_dict):\n     if \"allow_mutation\" in config_dict:\n-        config_dict = {\"frozen\": not config_dict[\"allow_mutation\"]}\n+        raise ValueError(\"allow_mutation is removed; use frozen=True\")\n     return {\"frozen\": bool(config_dict.get(\"frozen\", False)), \"extra\": config_dict.get(\"extra\", \"ignore\")}\ndiff --git a/validation/serializer.py b/validation/serializer.py\nindex 1111111..2222222 100644\n--- a/validation/serializer.py\n+++ b/validation/serializer.py\n@@ -1,2 +1,2 @@\n def dump_audit_record(event_name, iso_timestamp):\n-    return {\"event\": event_name, \"recorded_at\": iso_timestamp.replace(\"+00:00\", \"Z\")}\n+    return {\"event\": event_name, \"recorded_at\": iso_timestamp}\n",
+  "ground_truth": {
+    "sample_id": "S03_pydantic_2100",
+    "project": "pydantic/pydantic",
+    "from_version": "2.9.2",
+    "to_version": "2.10.0",
+    "release_url": "https://github.com/pydantic/pydantic/releases/tag/v2.10.0",
+    "license": "MIT",
+    "acceptance_criteria": [
+      "Must mark allow_mutation removal in compile_model_config() (use frozen=True) as breaking=true grounded in RN-1.",
+      "Must trace compile_model_config() to billing/ledger_writer.py::append_immutable_entry and dump_audit_record() to billing/invoice_exporter.py::export_invoice_json.",
+      "Must NOT mark RN-3 (opt-in experimental_allow_partial disabled by default) or RN-4 (18% speed improvement) as breaking=true.",
+      "Must preserve exact numbers (v2.10.0, +00:00, 18%) without inventing new metrics."
+    ],
+    "expected_breaking_line_ids": [
+      "RN-1"
+    ],
+    "non_breaking_trap_line_ids": [
+      "RN-2",
+      "RN-3",
+      "RN-4"
+    ],
+    "must_include_tokens": [
+      "v2.10.0",
+      "allow_mutation",
+      "frozen=True"
+    ],
+    "expected_changed_files": [
+      "validation/schema_config.py",
+      "validation/serializer.py"
+    ],
+    "expected_seed_nodes": [
+      "validation/schema_config.py::compile_model_config",
+      "validation/serializer.py::dump_audit_record"
+    ],
+    "expected_affected_callers": [
+      "billing/ledger_writer.py::append_immutable_entry",
+      "billing/invoice_exporter.py::export_invoice_json"
+    ],
+    "expected_selected_tests": [
+      "test_append_immutable_entry_frozen",
+      "test_export_invoice_json_preserves_tz"
+    ],
+    "excluded_unrelated_tests": [
+      "test_cents_to_dollars"
+    ]
+  },
+  "changeradar": {
+    "cache": {
+      "schema_version": "1.0",
+      "tool": "cache",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "cached": false,
+        "root_hash": "2cf15c8989c6d3ef9c3e74f3ecc2e65a7f879dd692cbdd1b6e9df1f4b525f7c8",
+        "changed_files": [],
+        "added_files": [],
+        "deleted_files": [
+          "billing/__init__.py",
+          "billing/currency_math.py",
+          "billing/invoice_exporter.py",
+          "billing/ledger_writer.py",
+          "tests/__init__.py",
+          "tests/test_currency_math.py",
+          "tests/test_invoice_exporter.py",
+          "tests/test_ledger_writer.py",
+          "validation/__init__.py",
+          "validation/schema_config.py",
+          "validation/serializer.py"
+        ],
+        "rebuild_scope": "full"
+      }
+    },
+    "callgraph": {
+      "schema_version": "1.0",
+      "tool": "callgraph",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "root": "workspaces\\spark_x26_skillhub_100usd\\data\\samples\\S03_pydantic_2100\\repo",
+        "stats": {
+          "files": 11,
+          "nodes": 19,
+          "edges": 5,
+          "parse_failures": 0,
+          "classes": 0,
+          "dynamic_modules": 0
+        },
+        "nodes": [
+          {
+            "id": "billing/currency_math.py::<module>",
+            "name": "billing/currency_math.py",
+            "kind": "module",
+            "file": "billing/currency_math.py",
+            "line_range": [
+              1,
+              2
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "billing/currency_math.py::cents_to_dollars",
+            "name": "cents_to_dollars",
+            "kind": "function",
+            "file": "billing/currency_math.py",
+            "line_range": [
+              1,
+              2
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "billing/invoice_exporter.py::<module>",
+            "name": "billing/invoice_exporter.py",
+            "kind": "module",
+            "file": "billing/invoice_exporter.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "billing/invoice_exporter.py::export_invoice_json",
+            "name": "export_invoice_json",
+            "kind": "function",
+            "file": "billing/invoice_exporter.py",
+            "line_range": [
+              4,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "billing/ledger_writer.py::<module>",
+            "name": "billing/ledger_writer.py",
+            "kind": "module",
+            "file": "billing/ledger_writer.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "billing/ledger_writer.py::append_immutable_entry",
+            "name": "append_immutable_entry",
+            "kind": "function",
+            "file": "billing/ledger_writer.py",
+            "line_range": [
+              4,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "billing/__init__.py::<module>",
+            "name": "billing/__init__.py",
+            "kind": "module",
+            "file": "billing/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "tests/test_currency_math.py::<module>",
+            "name": "tests/test_currency_math.py",
+            "kind": "module",
+            "file": "tests/test_currency_math.py",
+            "line_range": [
+              1,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_currency_math.py::test_cents_to_dollars",
+            "name": "test_cents_to_dollars",
+            "kind": "function",
+            "file": "tests/test_currency_math.py",
+            "line_range": [
+              4,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_invoice_exporter.py::<module>",
+            "name": "tests/test_invoice_exporter.py",
+            "kind": "module",
+            "file": "tests/test_invoice_exporter.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_invoice_exporter.py::test_export_invoice_json_preserves_tz",
+            "name": "test_export_invoice_json_preserves_tz",
+            "kind": "function",
+            "file": "tests/test_invoice_exporter.py",
+            "line_range": [
+              4,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_ledger_writer.py::<module>",
+            "name": "tests/test_ledger_writer.py",
+            "kind": "module",
+            "file": "tests/test_ledger_writer.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_ledger_writer.py::test_append_immutable_entry_frozen",
+            "name": "test_append_immutable_entry_frozen",
+            "kind": "function",
+            "file": "tests/test_ledger_writer.py",
+            "line_range": [
+              4,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/__init__.py::<module>",
+            "name": "tests/__init__.py",
+            "kind": "module",
+            "file": "tests/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "validation/schema_config.py::<module>",
+            "name": "validation/schema_config.py",
+            "kind": "module",
+            "file": "validation/schema_config.py",
+            "line_range": [
+              1,
+              4
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "validation/schema_config.py::compile_model_config",
+            "name": "compile_model_config",
+            "kind": "function",
+            "file": "validation/schema_config.py",
+            "line_range": [
+              1,
+              4
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "validation/serializer.py::<module>",
+            "name": "validation/serializer.py",
+            "kind": "module",
+            "file": "validation/serializer.py",
+            "line_range": [
+              1,
+              2
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "validation/serializer.py::dump_audit_record",
+            "name": "dump_audit_record",
+            "kind": "function",
+            "file": "validation/serializer.py",
+            "line_range": [
+              1,
+              2
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "validation/__init__.py::<module>",
+            "name": "validation/__init__.py",
+            "kind": "module",
+            "file": "validation/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          }
+        ],
+        "edges": [
+          {
+            "from": "billing/invoice_exporter.py::export_invoice_json",
+            "to": "validation/serializer.py::dump_audit_record",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "billing/invoice_exporter.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "billing/ledger_writer.py::append_immutable_entry",
+            "to": "validation/schema_config.py::compile_model_config",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "billing/ledger_writer.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "tests/test_currency_math.py::test_cents_to_dollars",
+            "to": "billing/currency_math.py::cents_to_dollars",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_currency_math.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "tests/test_invoice_exporter.py::test_export_invoice_json_preserves_tz",
+            "to": "billing/invoice_exporter.py::export_invoice_json",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_invoice_exporter.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "tests/test_ledger_writer.py::test_append_immutable_entry_frozen",
+            "to": "billing/ledger_writer.py::append_immutable_entry",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_ledger_writer.py",
+              "line": 5
+            }
+          }
+        ]
+      }
+    },
+    "diffparse": {
+      "schema_version": "1.0",
+      "tool": "diffparse",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "mode": "diff",
+        "changes": [
+          {
+            "file": "validation/schema_config.py",
+            "change_type": "modified",
+            "lines": [
+              [
+                3,
+                3
+              ]
+            ],
+            "functions": [
+              {
+                "name": "compile_model_config",
+                "node_id": "validation/schema_config.py::compile_model_config",
+                "line_range": [
+                  1,
+                  4
+                ]
+              }
+            ],
+            "unmapped_lines": []
+          },
+          {
+            "file": "validation/serializer.py",
+            "change_type": "modified",
+            "lines": [
+              [
+                2,
+                2
+              ]
+            ],
+            "functions": [
+              {
+                "name": "dump_audit_record",
+                "node_id": "validation/serializer.py::dump_audit_record",
+                "line_range": [
+                  1,
+                  2
+                ]
+              }
+            ],
+            "unmapped_lines": []
+          }
+        ],
+        "commits": []
+      }
+    },
+    "propagate": {
+      "schema_version": "1.0",
+      "tool": "propagate",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "seeds": [
+          "validation/schema_config.py::compile_model_config",
+          "validation/serializer.py::dump_audit_record"
+        ],
+        "impact": [
+          {
+            "node_id": "validation/schema_config.py::compile_model_config",
+            "distance": 0,
+            "path": [
+              "validation/schema_config.py::compile_model_config"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": true
+          },
+          {
+            "node_id": "validation/serializer.py::dump_audit_record",
+            "distance": 0,
+            "path": [
+              "validation/serializer.py::dump_audit_record"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": true
+          },
+          {
+            "node_id": "billing/invoice_exporter.py::export_invoice_json",
+            "distance": 1,
+            "path": [
+              "validation/serializer.py::dump_audit_record",
+              "billing/invoice_exporter.py::export_invoice_json"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": false
+          },
+          {
+            "node_id": "billing/ledger_writer.py::append_immutable_entry",
+            "distance": 1,
+            "path": [
+              "validation/schema_config.py::compile_model_config",
+              "billing/ledger_writer.py::append_immutable_entry"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": false
+          }
+        ],
+        "hubs": [],
+        "truncation": {
+          "max_distance": 3,
+          "fanin_cap": 50,
+          "hit_distance_cap": 0,
+          "hit_fanin_cap": 0
+        },
+        "module_fallback": [],
+        "confidence_distribution": {
+          "exact": 4,
+          "conservative": 0,
+          "unknown": 0
+        }
+      }
+    },
+    "testselect": {
+      "schema_version": "1.0",
+      "tool": "testselect",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "tests": [
+          {
+            "test_file": "test_invoice_exporter.py",
+            "test_name": "test_export_invoice_json_preserves_tz",
+            "node_id": [
+              "billing/invoice_exporter.py::export_invoice_json"
+            ],
+            "coupling_score": 1.0,
+            "coupling_basis": [
+              "direct_call"
+            ],
+            "covers": [
+              "billing/invoice_exporter.py::export_invoice_json"
+            ],
+            "risk_level": "high"
+          },
+          {
+            "test_file": "test_ledger_writer.py",
+            "test_name": "test_append_immutable_entry_frozen",
+            "node_id": [
+              "billing/ledger_writer.py::append_immutable_entry"
+            ],
+            "coupling_score": 1.0,
+            "coupling_basis": [
+              "direct_call"
+            ],
+            "covers": [
+              "billing/ledger_writer.py::append_immutable_entry"
+            ],
+            "risk_level": "high"
+          }
+        ],
+        "metrics": {
+          "total_tests": 3,
+          "selected": 2,
+          "compression_ratio": 0.667,
+          "impact_coverage": 0.5
+        }
+      }
+    },
+    "changed_files": [
+      "validation/schema_config.py",
+      "validation/serializer.py"
+    ],
+    "seed_nodes": [
+      "validation/schema_config.py::compile_model_config",
+      "validation/serializer.py::dump_audit_record"
+    ],
+    "affected_callers": [
+      "billing/invoice_exporter.py::export_invoice_json",
+      "billing/ledger_writer.py::append_immutable_entry"
+    ],
+    "all_impact_nodes": [
+      "validation/schema_config.py::compile_model_config",
+      "validation/serializer.py::dump_audit_record",
+      "billing/invoice_exporter.py::export_invoice_json",
+      "billing/ledger_writer.py::append_immutable_entry"
+    ],
+    "selected_tests": [
+      {
+        "test_file": "test_invoice_exporter.py",
+        "test_name": "test_export_invoice_json_preserves_tz",
+        "node_id": [
+          "billing/invoice_exporter.py::export_invoice_json"
+        ],
+        "coupling_score": 1.0,
+        "coupling_basis": [
+          "direct_call"
+        ],
+        "covers": [
+          "billing/invoice_exporter.py::export_invoice_json"
+        ],
+        "risk_level": "high"
+      },
+      {
+        "test_file": "test_ledger_writer.py",
+        "test_name": "test_append_immutable_entry_frozen",
+        "node_id": [
+          "billing/ledger_writer.py::append_immutable_entry"
+        ],
+        "coupling_score": 1.0,
+        "coupling_basis": [
+          "direct_call"
+        ],
+        "covers": [
+          "billing/ledger_writer.py::append_immutable_entry"
+        ],
+        "risk_level": "high"
+      }
+    ],
+    "total_tests": 3,
+    "compression_ratio": 0.667,
+    "impact_coverage": 0.5
+  },
+  "prompt_messages": [
+    {
+      "role": "system",
+      "content": "You are ReleaseGuard on Spark-X2.6-4B, guided by SkillHub skill `global/changeradar` (v20260809.064909).\nRules:\n1. NEVER invent call-graph node IDs, changed files, or test names; use ONLY values from `changeradar_json`.\n2. NEVER invent version numbers, percentages, dates, owners, CLI flags, or CVEs absent from `RN-1..RN-N` or `git_diff`.\n3. Output 1 item per `RN-k` (`CHK-1..CHK-N`). `verbatim_quote` MUST be an exact contiguous substring copied verbatim from `[RN-k]` without skipping any words (20-55 chars). Keep `title` and `action` concise (<12 words). Use full `file.py::func` strings from `seeds` in `changed_symbol`.\n4. `breaking:true` ONLY when `[RN-k]` starts with `Breaking` or says `Removed the deprecated`. Deprecations, `Behavior change:`, additive features, opt-in flags, speedups, unchanged bounds, docstrings, and future notes MUST have `breaking:false`.\n5. If `[RN-k]` mentions no owner / no target release date / future discussion, set `breaking:false` and `uncertainty_note:\"No owner or target date set\"`.\n6. Output single-line minified JSON only (no markdown fences, no newlines)."
+    },
+    {
+      "role": "user",
+      "content": "Upgrade `pydantic/pydantic` `2.9.2`->`2.10.0` (`data/samples/S03_pydantic_2100/repo`)\nNotes:\n[RN-1] Breaking: Passing `allow_mutation` inside `compile_model_config()` in `v2.10.0` now raises `ValueError(\"allow_mutation is removed; use frozen=True\")` instead of a deprecation warning.\n[RN-2] Behavior change: `dump_audit_record()` now preserves explicit UTC/offset suffixes on timezone-aware ISO-8601 timestamps rather than stripping `+00:00`.\n[RN-3] Added opt-in `experimental_allow_partial=\"trailing-strings\"` streaming flag (disabled by default; no impact on standard validation).\n[RN-4] Accelerated union schema compilation by `18%` with byte-identical JSON Schema output.\nDiff:\ndiff --git a/validation/schema_config.py b/validation/schema_config.py\nindex 1111111..2222222 100644\n--- a/validation/schema_config.py\n+++ b/validation/schema_config.py\n@@ -1,4 +1,4 @@\n def compile_model_config(config_dict):\n     if \"allow_mutation\" in config_dict:\n-        config_dict = {\"frozen\": not config_dict[\"allow_mutation\"]}\n+        raise ValueError(\"allow_mutation is removed; use frozen=True\")\n     return {\"frozen\": bool(config_dict.get(\"frozen\", False)), \"extra\": config_dict.get(\"extra\", \"ignore\")}\ndiff --git a/validation/serializer.py b/validation/serializer.py\nindex 1111111..2222222 100644\n--- a/validation/serializer.py\n+++ b/validation/serializer.py\n@@ -1,2 +1,2 @@\n def dump_audit_record(event_name, iso_timestamp):\n-    return {\"event\": event_name, \"recorded_at\": iso_timestamp.replace(\"+00:00\", \"Z\")}\n+    return {\"event\": event_name, \"recorded_at\": iso_timestamp}\nchangeradar_json:\n{\"changed_files\":[\"validation/schema_config.py\",\"validation/serializer.py\"],\"seeds\":[\"validation/schema_config.py::compile_model_config\",\"validation/serializer.py::dump_audit_record\"],\"callers\":[{\"id\":\"billing/invoice_exporter.py::export_invoice_json\",\"via\":\"validation/serializer.py::dump_audit_record\"},{\"id\":\"billing/ledger_writer.py::append_immutable_entry\",\"via\":\"validation/schema_config.py::compile_model_config\"}],\"tests\":[{\"name\":\"test_export_invoice_json_preserves_tz\",\"covers\":[\"billing/invoice_exporter.py::export_invoice_json\"]},{\"name\":\"test_append_immutable_entry_frozen\",\"covers\":[\"billing/ledger_writer.py::append_immutable_entry\"]}]}\nOutput minified JSON for RN-1..RN-4:\n{\"step0\":{\"schema_version\":\"1.0\",\"mode\":\"diff\",\"target\":{\"path\":\"data/samples/S03_pydantic_2100/repo\",\"tests_dir\":\"data/samples/S03_pydantic_2100/repo/tests\"},\"scope\":{\"diff_file\":\"patch.diff\"},\"confidence\":\"high\",\"clarification_needed\":[]},\"items\":[{\"id\":\"CHK-1\",\"title\":\"concise title\",\"action\":\"concise action\",\"breaking\":true,\"severity\":\"breaking|behavior_change|deprecation|additive\",\"release_note_line_id\":\"RN-1\",\"verbatim_quote\":\"exact 20-55 char substring of RN-1\",\"version_or_flag_tokens\":[\"2.10.0\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"file_or_null\",\"changed_symbol\":\"seed_or_null\",\"affected_features\":[\"caller_id\"],\"recommended_tests\":[\"test_name\"]}}]}\nInclude all required source tokens `['v2.10.0', 'allow_mutation', 'frozen=True']` across `version_or_flag_tokens` where mentioned in Notes. If an RN line matches no seed, use `null` and `[]` in `traced_change`."
+    }
+  ],
+  "inference": {
+    "backend": "openai_compat (http://127.0.0.1:18080/v1)",
+    "is_dry_run": false,
+    "model_id": "Spark-X2.6-4B-Q4_K_M",
+    "model_revision": "9d716770ac7477776de5f891f70cdf98b003a5cd",
+    "quantization_or_dtype": "Q4_K_M",
+    "thinking_mode": "none",
+    "raw_text": "{\"step0\":{\"schema_version\":\"1.0\",\"mode\":\"diff\",\"target\":{\"path\":\"data/samples/S03_pydantic_2100/repo\",\"tests_dir\":\"data/samples/S03_pydantic_2100/repo/tests\"},\"scope\":{\"diff_file\":\"patch.diff\"},\"confidence\":\"high\",\"clarification_needed\":[]},\"items\":[{\"id\":\"CHK-1\",\"title\":\"allow_mutation removed in compile_model_config\",\"action\":\"raise ValueError using frozen=True\",\"breaking\":true,\"severity\":\"breaking\",\"release_note_line_id\":\"RN-1\",\"verbatim_quote\":\"allow_mutation is removed; use frozen=True\",\"version_or_flag_tokens\":[\"2.10.0\",\"allow_mutation\",\"frozen=True\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"validation/schema_config.py\",\"changed_symbol\":\"validation/schema_config.py::compile_model_config\",\"affected_features\":[\"billing/invoice_exporter.py::export_invoice_json\",\"billing/ledger_writer.py::append_immutable_entry\"],\"recommended_tests\":[\"test_export_invoice_json_preserves_tz\",\"test_append_immutable_entry_frozen\"]}},{\"id\":\"CHK-2\",\"title\":\"dump_audit_record preserves tz suffixes\",\"action\":\"preserve explicit UTC/offset suffixes\",\"breaking\":false,\"severity\":\"behavior_change\",\"release_note_line_id\":\"RN-2\",\"verbatim_quote\":\"preserves explicit UTC/offset suffixes on timezone-aware ISO-8601 timestamps\",\"version_or_flag_tokens\":[\"2.10.0\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"validation/serializer.py\",\"changed_symbol\":\"validation/serializer.py::dump_audit_record\",\"affected_features\":[\"billing/invoice_exporter.py::export_invoice_json\",\"billing/ledger_writer.py::append_immutable_entry\"],\"recommended_tests\":[\"test_export_invoice_json_preserves_tz\",\"test_append_immutable_entry_frozen\"]}},{\"id\":\"CHK-3\",\"title\":\"experimental_allow_partial flag added\",\"action\":\"opt-in streaming flag disabled by default\",\"breaking\":false,\"severity\":\"additive\",\"release_note_line_id\":\"RN-3\",\"verbatim_quote\":\"Added opt-in experimental_allow_partial=\\\"trailing-strings\\\" streaming flag\",\"version_or_flag_tokens\":[\"2.10.0\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":null,\"changed_symbol\":null,\"affected_features\":[],\"recommended_tests\":[]}},{\"id\":\"CHK-4\",\"title\":\"union schema compilation accelerated\",\"action\":\"18% faster with identical JSON Schema output\",\"breaking\":false,\"severity\":\"behavior_change\",\"release_note_line_id\":\"RN-4\",\"verbatim_quote\":\"Accelerated union schema compilation by 18% with byte-identical JSON Schema output\",\"version_or_flag_tokens\":[\"2.10.0\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":null,\"changed_symbol\":null,\"affected_features\":[],\"recommended_tests\":[]}}]}",
+    "latency_ms": 223021.98,
+    "prompt_tokens": null,
+    "completion_tokens": 696,
+    "inference_settings": {
+      "api_base": "http://127.0.0.1:18080/v1",
+      "temperature": 0.0,
+      "top_p": 0.95,
+      "max_tokens": 900,
+      "stream": true,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  },
+  "step0_contract": {
+    "schema_version": "1.0",
+    "mode": "diff",
+    "target": {
+      "path": "data/samples/S03_pydantic_2100/repo",
+      "tests_dir": "data/samples/S03_pydantic_2100/repo/tests"
+    },
+    "scope": {
+      "diff_file": "patch.diff"
+    },
+    "confidence": "high",
+    "clarification_needed": []
+  },
+  "thinking_trace": "",
+  "checklist_items": [
+    {
+      "id": "CHK-1",
+      "title": "allow_mutation removed in compile_model_config",
+      "action": "raise ValueError using frozen=True",
+      "breaking": true,
+      "severity": "breaking",
+      "release_note_line_id": "RN-1",
+      "verbatim_quote": "allow_mutation is removed; use frozen=True",
+      "version_or_flag_tokens": [
+        "2.10.0",
+        "allow_mutation",
+        "frozen=True"
+      ],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": "validation/schema_config.py",
+        "changed_symbol": "validation/schema_config.py::compile_model_config",
+        "affected_features": [
+          "billing/invoice_exporter.py::export_invoice_json",
+          "billing/ledger_writer.py::append_immutable_entry"
+        ],
+        "recommended_tests": [
+          "test_export_invoice_json_preserves_tz",
+          "test_append_immutable_entry_frozen"
+        ]
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-2",
+      "title": "dump_audit_record preserves tz suffixes",
+      "action": "preserve explicit UTC/offset suffixes",
+      "breaking": false,
+      "severity": "behavior_change",
+      "release_note_line_id": "RN-2",
+      "verbatim_quote": "preserves explicit UTC/offset suffixes on timezone-aware ISO-8601 timestamps",
+      "version_or_flag_tokens": [
+        "2.10.0"
+      ],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": "validation/serializer.py",
+        "changed_symbol": "validation/serializer.py::dump_audit_record",
+        "affected_features": [
+          "billing/invoice_exporter.py::export_invoice_json",
+          "billing/ledger_writer.py::append_immutable_entry"
+        ],
+        "recommended_tests": [
+          "test_export_invoice_json_preserves_tz",
+          "test_append_immutable_entry_frozen"
+        ]
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-3",
+      "title": "experimental_allow_partial flag added",
+      "action": "opt-in streaming flag disabled by default",
+      "breaking": false,
+      "severity": "additive",
+      "release_note_line_id": "RN-3",
+      "verbatim_quote": "Added opt-in experimental_allow_partial=\"trailing-strings\" streaming flag",
+      "version_or_flag_tokens": [
+        "2.10.0"
+      ],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": null,
+        "changed_symbol": null,
+        "affected_features": [],
+        "recommended_tests": []
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-4",
+      "title": "union schema compilation accelerated",
+      "action": "18% faster with identical JSON Schema output",
+      "breaking": false,
+      "severity": "behavior_change",
+      "release_note_line_id": "RN-4",
+      "verbatim_quote": "Accelerated union schema compilation by 18% with byte-identical JSON Schema output",
+      "version_or_flag_tokens": [
+        "2.10.0"
+      ],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": null,
+        "changed_symbol": null,
+        "affected_features": [],
+        "recommended_tests": []
+      },
+      "review_status": "pending"
+    }
+  ],
+  "verification": {
+    "sample_id": "S03_pydantic_2100",
+    "all_gates_passed": false,
+    "gates": [
+      {
+        "gate_id": "G1",
+        "name": "Schema & Step-0 Contract Gate",
+        "passed": true,
+        "summary": "Validated Step-0 contract and 4 checklist item(s).",
+        "violations": []
+      },
+      {
+        "gate_id": "G2",
+        "name": "Verbatim Release-Note Quote Gate",
+        "passed": true,
+        "summary": "4/4 quotes verified verbatim against single source lines.",
+        "violations": []
+      },
+      {
+        "gate_id": "G3",
+        "name": "Zero-Invented Version, Number & Flag Gate",
+        "passed": true,
+        "summary": "All version numbers, metrics, CVEs, and flags grounded in source/diff.",
+        "violations": []
+      },
+      {
+        "gate_id": "G4",
+        "name": "Diff File & Seed Symbol Grounding Gate",
+        "passed": true,
+        "summary": "Every traced file and changed symbol matches `diffparse.py` / `propagate.py` seeds.",
+        "violations": []
+      },
+      {
+        "gate_id": "G5",
+        "name": "ChangeRadar Call-Graph & Test Red-Line Gate",
+        "passed": true,
+        "summary": "100% of traced downstream callers and regression tests verified against `changeradar` AST JSON.",
+        "violations": []
+      },
+      {
+        "gate_id": "G6",
+        "name": "Breaking Polarity & Uncertainty Preservation Gate",
+        "passed": true,
+        "summary": "Breaking polarity and unscheduled-item uncertainty preserved accurately.",
+        "violations": []
+      },
+      {
+        "gate_id": "G7",
+        "name": "Pre-Committed Gold Acceptance Criteria Gate",
+        "passed": false,
+        "summary": "Breaking match=True, seed_recall=100%, caller_recall=100%, test_exact=True.",
+        "violations": [
+          "Missing required acceptance token 'v2.10.0' in checklist output."
+        ]
+      }
+    ],
+    "verified_items_count": 4,
+    "total_items_count": 4,
+    "breaking_precision_match": true,
+    "seed_trace_recall": 1.0,
+    "caller_trace_recall": 1.0,
+    "test_selection_exact": true
+  }
+}

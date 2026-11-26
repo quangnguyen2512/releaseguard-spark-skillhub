@@ -1,0 +1,25 @@
+diff --git a/cli_kit/options.py b/cli_kit/options.py
+index 1111111..2222222 100644
+--- a/cli_kit/options.py
++++ b/cli_kit/options.py
+@@ -1,5 +1,5 @@
+ def resolve_envvar_value(env_map, key):
+     raw = env_map.get(key)
+-    if raw is None:
++    if raw is None or raw == "":
+         return None
+     return raw
+diff --git a/cli_kit/testing_harness.py b/cli_kit/testing_harness.py
+index 1111111..2222222 100644
+--- a/cli_kit/testing_harness.py
++++ b/cli_kit/testing_harness.py
+@@ -1,8 +1,7 @@
+ class CliRunner:
+-    def __init__(self, charset="utf-8", env=None, mix_stderr=True):
++    def __init__(self, charset="utf-8", env=None):
+         self.charset = charset
+         self.env = env or {}
+-        self.mix_stderr = mix_stderr
+ 
+     def run_command(self, cmd_name):
+         return {"cmd": cmd_name, "stdout": "ok", "stderr": ""}

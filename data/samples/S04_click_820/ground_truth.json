@@ -1,0 +1,45 @@
+{
+  "sample_id": "S04_click_820",
+  "project": "pallets/click",
+  "from_version": "8.1.7",
+  "to_version": "8.2.0",
+  "release_url": "https://github.com/pallets/click/releases/tag/8.2.0",
+  "license": "BSD-3-Clause",
+  "acceptance_criteria": [
+    "Must mark removal of mix_stderr from CliRunner.__init__() in 8.2.0 as breaking=true grounded in RN-1.",
+    "Must trace CliRunner.__init__ and resolve_envvar_value to runners/deploy_harness.py::invoke_deploy_cli and runners/env_loader.py::load_runtime_flags.",
+    "Must NOT mark RN-3 (Fish 3.7+ completions) or RN-4 (Context.protected_args scheduled for 9.0, not yet removed) as breaking=true in 8.2.0."
+  ],
+  "expected_breaking_line_ids": [
+    "RN-1"
+  ],
+  "non_breaking_trap_line_ids": [
+    "RN-2",
+    "RN-3",
+    "RN-4"
+  ],
+  "must_include_tokens": [
+    "8.2.0",
+    "mix_stderr",
+    "resolve_envvar_value"
+  ],
+  "expected_changed_files": [
+    "cli_kit/options.py",
+    "cli_kit/testing_harness.py"
+  ],
+  "expected_seed_nodes": [
+    "cli_kit/options.py::resolve_envvar_value",
+    "cli_kit/testing_harness.py::CliRunner::__init__"
+  ],
+  "expected_affected_callers": [
+    "runners/deploy_harness.py::invoke_deploy_cli",
+    "runners/env_loader.py::load_runtime_flags"
+  ],
+  "expected_selected_tests": [
+    "test_invoke_deploy_cli_runner",
+    "test_load_runtime_flags_empty_envvar"
+  ],
+  "excluded_unrelated_tests": [
+    "test_strip_ansi"
+  ]
+}

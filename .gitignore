@@ -1,0 +1,22 @@
+# Large local model weights, runtime binaries & scratch artifacts (never commit >10MB to Git)
+models/
+bin/
+scratch/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.cr_cache/
+*.gguf
+*.zip
+*.exe
+*.dll
+outputs/llama_server_run.log
+outputs/llama_server_*.log
+outputs/smoke_srv.log
+outputs/*dry_run*
+outputs/runs/dry_run_preview/
+OPEN_SPARK_SUBMIT.ps1
+SUBMIT_GUIDE.md
+.ua/
+.understand-anything/

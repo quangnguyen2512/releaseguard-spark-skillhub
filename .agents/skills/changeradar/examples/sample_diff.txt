@@ -1,0 +1,22 @@
+diff --git a/models/order.py b/models/order.py
+index 6574718..f381100 100644
+--- a/models/order.py
++++ b/models/order.py
+@@ -10,12 +10,12 @@ class OrderModel(BaseModel):
+         super().__init__(name)
+ 
+     def validate(self, data):
+-        """override：订单需 amount>=0（缺陷：应为 >0）。"""
++        """override：订单需 amount>0。"""
+         super().validate(data)
+-        if data.get("amount", 0) < 0:
+-            raise ValueError("amount 不能为负")
++        if data.get("amount", 0) <= 0:
++            raise ValueError("amount 必须为正")
+         return True
+ 
+     def total(self, items):
+-        """计算订单总额（缺陷：漏乘 qty，只累加 price）。"""
+-        return sum(i.get("price", 0) for i in items)
++        """计算订单总额。"""
++        return sum(i.get("price", 0) * i.get("qty", 0) for i in items)

@@ -1,0 +1,863 @@
+{
+  "sample_id": "S02_fastapi_01150",
+  "project": "fastapi/fastapi",
+  "from_version": "0.114.2",
+  "to_version": "0.115.0",
+  "release_url": "https://github.com/fastapi/fastapi/releases/tag/0.115.0",
+  "license": "MIT",
+  "release_lines": [
+    {
+      "line_id": "RN-1",
+      "line_num": 4,
+      "text": "Breaking: Removed the deprecated `regex` parameter in `build_query_validator()` under Pydantic v2; migrate all query validators to `pattern` before upgrading to `0.115.0`."
+    },
+    {
+      "line_id": "RN-2",
+      "line_num": 5,
+      "text": "Deprecated `on_event(\"startup\")` hook registration in `register_lifespan_hooks()`; pass an async `lifespan` context manager instead."
+    },
+    {
+      "line_id": "RN-3",
+      "line_num": 6,
+      "text": "Added `Annotated` form model binding support without altering existing field-by-field `Form(...)` signatures."
+    },
+    {
+      "line_id": "RN-4",
+      "line_num": 7,
+      "text": "Future note: `OAuth2PasswordBearer` `tokenUrl` relative-path rules will be revisited in a future discussion; no owner or target release date is set."
+    }
+  ],
+  "patch_diff_raw": "diff --git a/api_core/lifespan.py b/api_core/lifespan.py\nindex 1111111..2222222 100644\n--- a/api_core/lifespan.py\n+++ b/api_core/lifespan.py\n@@ -1,4 +1,4 @@\n-def register_lifespan_hooks(on_event=None, lifespan=None):\n+def register_lifespan_hooks(lifespan=None):\n     if lifespan is None:\n-        return {\"mode\": on_event or \"default\", \"active\": False}\n+        return {\"mode\": \"default\", \"active\": False}\n     return {\"mode\": \"lifespan_ctx\", \"handler\": lifespan, \"active\": True}\ndiff --git a/api_core/params.py b/api_core/params.py\nindex 1111111..2222222 100644\n--- a/api_core/params.py\n+++ b/api_core/params.py\n@@ -1,6 +1,6 @@\n import re\n \n \n-def build_query_validator(regex=None, max_length=64):\n-    compiled = re.compile(regex) if regex else None\n-    return {\"regex\": regex, \"compiled\": compiled, \"max_length\": max_length}\n+def build_query_validator(pattern=None, max_length=64):\n+    compiled = re.compile(pattern) if pattern else None\n+    return {\"pattern\": pattern, \"compiled\": compiled, \"max_length\": max_length}\n",
+  "ground_truth": {
+    "sample_id": "S02_fastapi_01150",
+    "project": "fastapi/fastapi",
+    "from_version": "0.114.2",
+    "to_version": "0.115.0",
+    "release_url": "https://github.com/fastapi/fastapi/releases/tag/0.115.0",
+    "license": "MIT",
+    "acceptance_criteria": [
+      "Must flag removal of regex in build_query_validator() -> pattern as breaking=true grounded in RN-1.",
+      "Must trace build_query_validator() to endpoints/search_api.py::search_items_endpoint and register_lifespan_hooks() to endpoints/app_factory.py::create_service_app.",
+      "Must NOT mark RN-3 (Annotated Form additive support) as breaking=true.",
+      "Must preserve uncertainty in RN-4 (no owner or release date invented for OAuth2PasswordBearer tokenUrl)."
+    ],
+    "expected_breaking_line_ids": [
+      "RN-1"
+    ],
+    "non_breaking_trap_line_ids": [
+      "RN-2",
+      "RN-3",
+      "RN-4"
+    ],
+    "must_include_tokens": [
+      "0.115.0",
+      "regex",
+      "pattern",
+      "lifespan"
+    ],
+    "expected_changed_files": [
+      "api_core/lifespan.py",
+      "api_core/params.py"
+    ],
+    "expected_seed_nodes": [
+      "api_core/params.py::build_query_validator",
+      "api_core/lifespan.py::register_lifespan_hooks"
+    ],
+    "expected_affected_callers": [
+      "endpoints/search_api.py::search_items_endpoint",
+      "endpoints/app_factory.py::create_service_app"
+    ],
+    "expected_selected_tests": [
+      "test_search_items_pattern_validation",
+      "test_create_service_app_lifespan"
+    ],
+    "excluded_unrelated_tests": [
+      "test_liveness_probe"
+    ]
+  },
+  "changeradar": {
+    "cache": {
+      "schema_version": "1.0",
+      "tool": "cache",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "cached": false,
+        "root_hash": "8ba511396a8f69280249ca11b1998f863231b8493fb4e7b3069d81c3e4d84422",
+        "changed_files": [],
+        "added_files": [],
+        "deleted_files": [
+          "api_core/__init__.py",
+          "api_core/lifespan.py",
+          "api_core/params.py",
+          "endpoints/__init__.py",
+          "endpoints/app_factory.py",
+          "endpoints/healthcheck.py",
+          "endpoints/search_api.py",
+          "tests/__init__.py",
+          "tests/test_app_factory.py",
+          "tests/test_healthcheck.py",
+          "tests/test_search_api.py"
+        ],
+        "rebuild_scope": "full"
+      }
+    },
+    "callgraph": {
+      "schema_version": "1.0",
+      "tool": "callgraph",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "root": "workspaces\\spark_x26_skillhub_100usd\\data\\samples\\S02_fastapi_01150\\repo",
+        "stats": {
+          "files": 11,
+          "nodes": 19,
+          "edges": 5,
+          "parse_failures": 0,
+          "classes": 0,
+          "dynamic_modules": 0
+        },
+        "nodes": [
+          {
+            "id": "api_core/lifespan.py::<module>",
+            "name": "api_core/lifespan.py",
+            "kind": "module",
+            "file": "api_core/lifespan.py",
+            "line_range": [
+              1,
+              4
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "api_core/lifespan.py::register_lifespan_hooks",
+            "name": "register_lifespan_hooks",
+            "kind": "function",
+            "file": "api_core/lifespan.py",
+            "line_range": [
+              1,
+              4
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "api_core/params.py::<module>",
+            "name": "api_core/params.py",
+            "kind": "module",
+            "file": "api_core/params.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "api_core/params.py::build_query_validator",
+            "name": "build_query_validator",
+            "kind": "function",
+            "file": "api_core/params.py",
+            "line_range": [
+              4,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "api_core/__init__.py::<module>",
+            "name": "api_core/__init__.py",
+            "kind": "module",
+            "file": "api_core/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "endpoints/app_factory.py::<module>",
+            "name": "endpoints/app_factory.py",
+            "kind": "module",
+            "file": "endpoints/app_factory.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "endpoints/app_factory.py::create_service_app",
+            "name": "create_service_app",
+            "kind": "function",
+            "file": "endpoints/app_factory.py",
+            "line_range": [
+              4,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "endpoints/healthcheck.py::<module>",
+            "name": "endpoints/healthcheck.py",
+            "kind": "module",
+            "file": "endpoints/healthcheck.py",
+            "line_range": [
+              1,
+              2
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "endpoints/healthcheck.py::liveness_probe",
+            "name": "liveness_probe",
+            "kind": "function",
+            "file": "endpoints/healthcheck.py",
+            "line_range": [
+              1,
+              2
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "endpoints/search_api.py::<module>",
+            "name": "endpoints/search_api.py",
+            "kind": "module",
+            "file": "endpoints/search_api.py",
+            "line_range": [
+              1,
+              7
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "endpoints/search_api.py::search_items_endpoint",
+            "name": "search_items_endpoint",
+            "kind": "function",
+            "file": "endpoints/search_api.py",
+            "line_range": [
+              4,
+              7
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "endpoints/__init__.py::<module>",
+            "name": "endpoints/__init__.py",
+            "kind": "module",
+            "file": "endpoints/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "tests/test_app_factory.py::<module>",
+            "name": "tests/test_app_factory.py",
+            "kind": "module",
+            "file": "tests/test_app_factory.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_app_factory.py::test_create_service_app_lifespan",
+            "name": "test_create_service_app_lifespan",
+            "kind": "function",
+            "file": "tests/test_app_factory.py",
+            "line_range": [
+              4,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_healthcheck.py::<module>",
+            "name": "tests/test_healthcheck.py",
+            "kind": "module",
+            "file": "tests/test_healthcheck.py",
+            "line_range": [
+              1,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_healthcheck.py::test_liveness_probe",
+            "name": "test_liveness_probe",
+            "kind": "function",
+            "file": "tests/test_healthcheck.py",
+            "line_range": [
+              4,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_search_api.py::<module>",
+            "name": "tests/test_search_api.py",
+            "kind": "module",
+            "file": "tests/test_search_api.py",
+            "line_range": [
+              1,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_search_api.py::test_search_items_pattern_validation",
+            "name": "test_search_items_pattern_validation",
+            "kind": "function",
+            "file": "tests/test_search_api.py",
+            "line_range": [
+              4,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/__init__.py::<module>",
+            "name": "tests/__init__.py",
+            "kind": "module",
+            "file": "tests/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          }
+        ],
+        "edges": [
+          {
+            "from": "endpoints/app_factory.py::create_service_app",
+            "to": "api_core/lifespan.py::register_lifespan_hooks",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "endpoints/app_factory.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "endpoints/search_api.py::search_items_endpoint",
+            "to": "api_core/params.py::build_query_validator",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "endpoints/search_api.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "tests/test_app_factory.py::test_create_service_app_lifespan",
+            "to": "endpoints/app_factory.py::create_service_app",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_app_factory.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "tests/test_healthcheck.py::test_liveness_probe",
+            "to": "endpoints/healthcheck.py::liveness_probe",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_healthcheck.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "tests/test_search_api.py::test_search_items_pattern_validation",
+            "to": "endpoints/search_api.py::search_items_endpoint",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_search_api.py",
+              "line": 5
+            }
+          }
+        ]
+      }
+    },
+    "diffparse": {
+      "schema_version": "1.0",
+      "tool": "diffparse",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "mode": "diff",
+        "changes": [
+          {
+            "file": "api_core/lifespan.py",
+            "change_type": "modified",
+            "lines": [
+              [
+                1,
+                1
+              ],
+              [
+                3,
+                3
+              ]
+            ],
+            "functions": [
+              {
+                "name": "register_lifespan_hooks",
+                "node_id": "api_core/lifespan.py::register_lifespan_hooks",
+                "line_range": [
+                  1,
+                  4
+                ]
+              }
+            ],
+            "unmapped_lines": []
+          },
+          {
+            "file": "api_core/params.py",
+            "change_type": "modified",
+            "lines": [
+              [
+                4,
+                6
+              ]
+            ],
+            "functions": [
+              {
+                "name": "build_query_validator",
+                "node_id": "api_core/params.py::build_query_validator",
+                "line_range": [
+                  4,
+                  6
+                ]
+              }
+            ],
+            "unmapped_lines": []
+          }
+        ],
+        "commits": []
+      }
+    },
+    "propagate": {
+      "schema_version": "1.0",
+      "tool": "propagate",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "seeds": [
+          "api_core/lifespan.py::register_lifespan_hooks",
+          "api_core/params.py::build_query_validator"
+        ],
+        "impact": [
+          {
+            "node_id": "api_core/lifespan.py::register_lifespan_hooks",
+            "distance": 0,
+            "path": [
+              "api_core/lifespan.py::register_lifespan_hooks"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": true
+          },
+          {
+            "node_id": "api_core/params.py::build_query_validator",
+            "distance": 0,
+            "path": [
+              "api_core/params.py::build_query_validator"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": true
+          },
+          {
+            "node_id": "endpoints/app_factory.py::create_service_app",
+            "distance": 1,
+            "path": [
+              "api_core/lifespan.py::register_lifespan_hooks",
+              "endpoints/app_factory.py::create_service_app"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": false
+          },
+          {
+            "node_id": "endpoints/search_api.py::search_items_endpoint",
+            "distance": 1,
+            "path": [
+              "api_core/params.py::build_query_validator",
+              "endpoints/search_api.py::search_items_endpoint"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": false
+          }
+        ],
+        "hubs": [],
+        "truncation": {
+          "max_distance": 3,
+          "fanin_cap": 50,
+          "hit_distance_cap": 0,
+          "hit_fanin_cap": 0
+        },
+        "module_fallback": [],
+        "confidence_distribution": {
+          "exact": 4,
+          "conservative": 0,
+          "unknown": 0
+        }
+      }
+    },
+    "testselect": {
+      "schema_version": "1.0",
+      "tool": "testselect",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "tests": [
+          {
+            "test_file": "test_app_factory.py",
+            "test_name": "test_create_service_app_lifespan",
+            "node_id": [
+              "endpoints/app_factory.py::create_service_app"
+            ],
+            "coupling_score": 1.0,
+            "coupling_basis": [
+              "direct_call"
+            ],
+            "covers": [
+              "endpoints/app_factory.py::create_service_app"
+            ],
+            "risk_level": "high"
+          },
+          {
+            "test_file": "test_search_api.py",
+            "test_name": "test_search_items_pattern_validation",
+            "node_id": [
+              "endpoints/search_api.py::search_items_endpoint"
+            ],
+            "coupling_score": 1.0,
+            "coupling_basis": [
+              "direct_call"
+            ],
+            "covers": [
+              "endpoints/search_api.py::search_items_endpoint"
+            ],
+            "risk_level": "high"
+          }
+        ],
+        "metrics": {
+          "total_tests": 3,
+          "selected": 2,
+          "compression_ratio": 0.667,
+          "impact_coverage": 0.5
+        }
+      }
+    },
+    "changed_files": [
+      "api_core/lifespan.py",
+      "api_core/params.py"
+    ],
+    "seed_nodes": [
+      "api_core/lifespan.py::register_lifespan_hooks",
+      "api_core/params.py::build_query_validator"
+    ],
+    "affected_callers": [
+      "endpoints/app_factory.py::create_service_app",
+      "endpoints/search_api.py::search_items_endpoint"
+    ],
+    "all_impact_nodes": [
+      "api_core/lifespan.py::register_lifespan_hooks",
+      "api_core/params.py::build_query_validator",
+      "endpoints/app_factory.py::create_service_app",
+      "endpoints/search_api.py::search_items_endpoint"
+    ],
+    "selected_tests": [
+      {
+        "test_file": "test_app_factory.py",
+        "test_name": "test_create_service_app_lifespan",
+        "node_id": [
+          "endpoints/app_factory.py::create_service_app"
+        ],
+        "coupling_score": 1.0,
+        "coupling_basis": [
+          "direct_call"
+        ],
+        "covers": [
+          "endpoints/app_factory.py::create_service_app"
+        ],
+        "risk_level": "high"
+      },
+      {
+        "test_file": "test_search_api.py",
+        "test_name": "test_search_items_pattern_validation",
+        "node_id": [
+          "endpoints/search_api.py::search_items_endpoint"
+        ],
+        "coupling_score": 1.0,
+        "coupling_basis": [
+          "direct_call"
+        ],
+        "covers": [
+          "endpoints/search_api.py::search_items_endpoint"
+        ],
+        "risk_level": "high"
+      }
+    ],
+    "total_tests": 3,
+    "compression_ratio": 0.667,
+    "impact_coverage": 0.5
+  },
+  "prompt_messages": [
+    {
+      "role": "system",
+      "content": "You are ReleaseGuard on Spark-X2.6-4B, guided by SkillHub skill `global/changeradar` (v20260809.064909).\nRules:\n1. NEVER invent call-graph node IDs, changed files, or test names; use ONLY values from `changeradar_json`.\n2. NEVER invent version numbers, percentages, dates, owners, CLI flags, or CVEs absent from `RN-1..RN-N` or `git_diff`.\n3. Output 1 item per `RN-k` (`CHK-1..CHK-N`). `verbatim_quote` MUST be an exact contiguous substring copied verbatim from `[RN-k]` without skipping any words (20-55 chars). Keep `title` and `action` concise (<12 words). Use full `file.py::func` strings from `seeds` in `changed_symbol`.\n4. `breaking:true` ONLY when `[RN-k]` starts with `Breaking` or says `Removed the deprecated`. Deprecations, `Behavior change:`, additive features, opt-in flags, speedups, unchanged bounds, docstrings, and future notes MUST have `breaking:false`.\n5. If `[RN-k]` mentions no owner / no target release date / future discussion, set `breaking:false` and `uncertainty_note:\"No owner or target date set\"`.\n6. Output single-line minified JSON only (no markdown fences, no newlines)."
+    },
+    {
+      "role": "user",
+      "content": "Upgrade `fastapi/fastapi` `0.114.2`->`0.115.0` (`data/samples/S02_fastapi_01150/repo`)\nNotes:\n[RN-1] Breaking: Removed the deprecated `regex` parameter in `build_query_validator()` under Pydantic v2; migrate all query validators to `pattern` before upgrading to `0.115.0`.\n[RN-2] Deprecated `on_event(\"startup\")` hook registration in `register_lifespan_hooks()`; pass an async `lifespan` context manager instead.\n[RN-3] Added `Annotated` form model binding support without altering existing field-by-field `Form(...)` signatures.\n[RN-4] Future note: `OAuth2PasswordBearer` `tokenUrl` relative-path rules will be revisited in a future discussion; no owner or target release date is set.\nDiff:\ndiff --git a/api_core/lifespan.py b/api_core/lifespan.py\nindex 1111111..2222222 100644\n--- a/api_core/lifespan.py\n+++ b/api_core/lifespan.py\n@@ -1,4 +1,4 @@\n-def register_lifespan_hooks(on_event=None, lifespan=None):\n+def register_lifespan_hooks(lifespan=None):\n     if lifespan is None:\n-        return {\"mode\": on_event or \"default\", \"active\": False}\n+        return {\"mode\": \"default\", \"active\": False}\n     return {\"mode\": \"lifespan_ctx\", \"handler\": lifespan, \"active\": True}\ndiff --git a/api_core/params.py b/api_core/params.py\nindex 1111111..2222222 100644\n--- a/api_core/params.py\n+++ b/api_core/params.py\n@@ -1,6 +1,6 @@\n import re\n \n \n-def build_query_validator(regex=None, max_length=64):\n-    compiled = re.compile(regex) if regex else None\n-    return {\"regex\": regex, \"compiled\": compiled, \"max_length\": max_length}\n+def build_query_validator(pattern=None, max_length=64):\n+    compiled = re.compile(pattern) if pattern else None\n+    return {\"pattern\": pattern, \"compiled\": compiled, \"max_length\": max_length}\nchangeradar_json:\n{\"changed_files\":[\"api_core/lifespan.py\",\"api_core/params.py\"],\"seeds\":[\"api_core/lifespan.py::register_lifespan_hooks\",\"api_core/params.py::build_query_validator\"],\"callers\":[{\"id\":\"endpoints/app_factory.py::create_service_app\",\"via\":\"api_core/lifespan.py::register_lifespan_hooks\"},{\"id\":\"endpoints/search_api.py::search_items_endpoint\",\"via\":\"api_core/params.py::build_query_validator\"}],\"tests\":[{\"name\":\"test_create_service_app_lifespan\",\"covers\":[\"endpoints/app_factory.py::create_service_app\"]},{\"name\":\"test_search_items_pattern_validation\",\"covers\":[\"endpoints/search_api.py::search_items_endpoint\"]}]}\nOutput minified JSON for RN-1..RN-4:\n{\"step0\":{\"schema_version\":\"1.0\",\"mode\":\"diff\",\"target\":{\"path\":\"data/samples/S02_fastapi_01150/repo\",\"tests_dir\":\"data/samples/S02_fastapi_01150/repo/tests\"},\"scope\":{\"diff_file\":\"patch.diff\"},\"confidence\":\"high\",\"clarification_needed\":[]},\"items\":[{\"id\":\"CHK-1\",\"title\":\"concise title\",\"action\":\"concise action\",\"breaking\":true,\"severity\":\"breaking|behavior_change|deprecation|additive\",\"release_note_line_id\":\"RN-1\",\"verbatim_quote\":\"exact 20-55 char substring of RN-1\",\"version_or_flag_tokens\":[\"0.115.0\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"file_or_null\",\"changed_symbol\":\"seed_or_null\",\"affected_features\":[\"caller_id\"],\"recommended_tests\":[\"test_name\"]}}]}\nInclude all required source tokens `['0.115.0', 'regex', 'pattern', 'lifespan']` across `version_or_flag_tokens` where mentioned in Notes. If an RN line matches no seed, use `null` and `[]` in `traced_change`."
+    }
+  ],
+  "inference": {
+    "backend": "openai_compat (http://127.0.0.1:18080/v1)",
+    "is_dry_run": false,
+    "model_id": "Spark-X2.6-4B-Q4_K_M",
+    "model_revision": "9d716770ac7477776de5f891f70cdf98b003a5cd",
+    "quantization_or_dtype": "Q4_K_M",
+    "thinking_mode": "none",
+    "raw_text": "{\"step0\":{\"schema_version\":\"1.0\",\"mode\":\"diff\",\"target\":{\"path\":\"data/samples/S02_fastapi_01150/repo\",\"tests_dir\":\"data/samples/S02_fastapi_01150/repo/tests\"},\"scope\":{\"diff_file\":\"patch.diff\"},\"confidence\":\"high\",\"clarification_needed\":[]},\"items\":[{\"id\":\"CHK-1\",\"title\":\"Remove deprecated regex param in build_query_validator\",\"action\":\"Migrate query validators to pattern before upgrading to 0.115.0\",\"breaking\":true,\"severity\":\"breaking\",\"release_note_line_id\":\"RN-1\",\"verbatim_quote\":\"Removed the deprecated `regex` parameter in `build_query_validator()` under Pydantic v2\",\"version_or_flag_tokens\":[\"0.115.0\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"api_core/params.py\",\"changed_symbol\":\"api_core/params.py::build_query_validator\",\"affected_features\":[\"endpoints/app_factory.py::create_service_app\",\"endpoints/search_api.py::search_items_endpoint\"],\"recommended_tests\":[\"test_create_service_app_lifespan\",\"test_search_items_pattern_validation\"]}},{\"id\":\"CHK-2\",\"title\":\"Deprecate on_event startup hook registration\",\"action\":\"Pass async lifespan context manager instead of on_event hook\",\"breaking\":false,\"severity\":\"deprecation\",\"release_note_line_id\":\"RN-2\",\"verbatim_quote\":\"Deprecated `on_event(\\\"startup\\\")` hook registration in `register_lifespan_hooks()`\",\"version_or_flag_tokens\":[],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"api_core/lifespan.py\",\"changed_symbol\":\"api_core/lifespan.py::register_lifespan_hooks\",\"affected_features\":[\"endpoints/app_factory.py::create_service_app\"],\"recommended_tests\":[\"test_create_service_app_lifespan\"]}},{\"id\":\"CHK-3\",\"title\":\"Add Annotated form model binding support\",\"action\":\"Add Annotated form model binding without altering existing Form signatures\",\"breaking\":false,\"severity\":\"additive\",\"release_note_line_id\":\"RN-3\",\"verbatim_quote\":\"Added `Annotated` form model binding support without altering existing field-by-field `Form(...)` signatures.\",\"version_or_flag_tokens\":[],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":null,\"changed_symbol\":null,\"affected_features\":[],\"recommended_tests\":[]}},{\"id\":\"CHK-4\",\"title\":\"Future note on OAuth2PasswordBearer tokenUrl rules\",\"action\":\"No owner or target release date set for future discussion\",\"breaking\":false,\"severity\":\"behavior_change\",\"release_note_line_id\":\"RN-4\",\"verbatim_quote\":\"`OAuth2PasswordBearer` `tokenUrl` relative-path rules will be revisited in a future discussion; no owner or target release date is set.\",\"version_or_flag_tokens\":[],\"uncertainty_note\":\"No owner or target date set\",\"traced_change\":{\"changed_file\":null,\"changed_symbol\":null,\"affected_features\":[],\"recommended_tests\":[]}}]}",
+    "latency_ms": 291546.92,
+    "prompt_tokens": null,
+    "completion_tokens": 713,
+    "inference_settings": {
+      "api_base": "http://127.0.0.1:18080/v1",
+      "temperature": 0.0,
+      "top_p": 0.95,
+      "max_tokens": 900,
+      "stream": true,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  },
+  "step0_contract": {
+    "schema_version": "1.0",
+    "mode": "diff",
+    "target": {
+      "path": "data/samples/S02_fastapi_01150/repo",
+      "tests_dir": "data/samples/S02_fastapi_01150/repo/tests"
+    },
+    "scope": {
+      "diff_file": "patch.diff"
+    },
+    "confidence": "high",
+    "clarification_needed": []
+  },
+  "thinking_trace": "",
+  "checklist_items": [
+    {
+      "id": "CHK-1",
+      "title": "Remove deprecated regex param in build_query_validator",
+      "action": "Migrate query validators to pattern before upgrading to 0.115.0",
+      "breaking": true,
+      "severity": "breaking",
+      "release_note_line_id": "RN-1",
+      "verbatim_quote": "Removed the deprecated `regex` parameter in `build_query_validator()` under Pydantic v2",
+      "version_or_flag_tokens": [
+        "0.115.0"
+      ],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": "api_core/params.py",
+        "changed_symbol": "api_core/params.py::build_query_validator",
+        "affected_features": [
+          "endpoints/app_factory.py::create_service_app",
+          "endpoints/search_api.py::search_items_endpoint"
+        ],
+        "recommended_tests": [
+          "test_create_service_app_lifespan",
+          "test_search_items_pattern_validation"
+        ]
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-2",
+      "title": "Deprecate on_event startup hook registration",
+      "action": "Pass async lifespan context manager instead of on_event hook",
+      "breaking": false,
+      "severity": "deprecation",
+      "release_note_line_id": "RN-2",
+      "verbatim_quote": "Deprecated `on_event(\"startup\")` hook registration in `register_lifespan_hooks()`",
+      "version_or_flag_tokens": [],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": "api_core/lifespan.py",
+        "changed_symbol": "api_core/lifespan.py::register_lifespan_hooks",
+        "affected_features": [
+          "endpoints/app_factory.py::create_service_app"
+        ],
+        "recommended_tests": [
+          "test_create_service_app_lifespan"
+        ]
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-3",
+      "title": "Add Annotated form model binding support",
+      "action": "Add Annotated form model binding without altering existing Form signatures",
+      "breaking": false,
+      "severity": "additive",
+      "release_note_line_id": "RN-3",
+      "verbatim_quote": "Added `Annotated` form model binding support without altering existing field-by-field `Form(...)` signatures.",
+      "version_or_flag_tokens": [],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": null,
+        "changed_symbol": null,
+        "affected_features": [],
+        "recommended_tests": []
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-4",
+      "title": "Future note on OAuth2PasswordBearer tokenUrl rules",
+      "action": "No owner or target release date set for future discussion",
+      "breaking": false,
+      "severity": "behavior_change",
+      "release_note_line_id": "RN-4",
+      "verbatim_quote": "`OAuth2PasswordBearer` `tokenUrl` relative-path rules will be revisited in a future discussion; no owner or target release date is set.",
+      "version_or_flag_tokens": [],
+      "uncertainty_note": "No owner or target date set",
+      "traced_change": {
+        "changed_file": null,
+        "changed_symbol": null,
+        "affected_features": [],
+        "recommended_tests": []
+      },
+      "review_status": "pending"
+    }
+  ],
+  "verification": {
+    "sample_id": "S02_fastapi_01150",
+    "all_gates_passed": true,
+    "gates": [
+      {
+        "gate_id": "G1",
+        "name": "Schema & Step-0 Contract Gate",
+        "passed": true,
+        "summary": "Validated Step-0 contract and 4 checklist item(s).",
+        "violations": []
+      },
+      {
+        "gate_id": "G2",
+        "name": "Verbatim Release-Note Quote Gate",
+        "passed": true,
+        "summary": "4/4 quotes verified verbatim against single source lines.",
+        "violations": []
+      },
+      {
+        "gate_id": "G3",
+        "name": "Zero-Invented Version, Number & Flag Gate",
+        "passed": true,
+        "summary": "All version numbers, metrics, CVEs, and flags grounded in source/diff.",
+        "violations": []
+      },
+      {
+        "gate_id": "G4",
+        "name": "Diff File & Seed Symbol Grounding Gate",
+        "passed": true,
+        "summary": "Every traced file and changed symbol matches `diffparse.py` / `propagate.py` seeds.",
+        "violations": []
+      },
+      {
+        "gate_id": "G5",
+        "name": "ChangeRadar Call-Graph & Test Red-Line Gate",
+        "passed": true,
+        "summary": "100% of traced downstream callers and regression tests verified against `changeradar` AST JSON.",
+        "violations": []
+      },
+      {
+        "gate_id": "G6",
+        "name": "Breaking Polarity & Uncertainty Preservation Gate",
+        "passed": true,
+        "summary": "Breaking polarity and unscheduled-item uncertainty preserved accurately.",
+        "violations": []
+      },
+      {
+        "gate_id": "G7",
+        "name": "Pre-Committed Gold Acceptance Criteria Gate",
+        "passed": true,
+        "summary": "Breaking match=True, seed_recall=100%, caller_recall=100%, test_exact=True.",
+        "violations": []
+      }
+    ],
+    "verified_items_count": 4,
+    "total_items_count": 4,
+    "breaking_precision_match": true,
+    "seed_trace_recall": 1.0,
+    "caller_trace_recall": 1.0,
+    "test_selection_exact": true
+  }
+}

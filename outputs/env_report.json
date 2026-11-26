@@ -1,0 +1,53 @@
+{
+  "os_platform": "Windows-10-10.0.26300-SP0",
+  "python_version": "3.10.0",
+  "cpu_model": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+  "logical_cores": 4,
+  "ram_total_gib": 15.7,
+  "nvidia_gpu": null,
+  "disk_drive": "C:",
+  "disk_total_gib": 474.9,
+  "disk_free_gib": 118.85,
+  "hf_cache_dir": "C:\\Users\\nqqua\\.cache\\huggingface\\hub",
+  "cached_spark_repos": [],
+  "local_gguf_files": [
+    "Spark-X2.6-4B-Q4_K_M.gguf (3.30 GiB)"
+  ],
+  "active_local_servers": [
+    {
+      "api_base": "http://127.0.0.1:18080/v1",
+      "spark_models": [
+        "Spark-X2.6-4B-Q4_K_M"
+      ]
+    }
+  ],
+  "recommended_runtime": "No discrete NVIDIA GPU detected (15.7 GiB system RAM): strongly recommend quantized `XHToken/Spark-X2.6-4B-GGUF` (`Spark-X2.6-4B-Q4_K_M.gguf`, 3.300 GiB / 3.543 GB) via `llama.cpp` `llama-server` (b10828+) or `Ollama` (`ollama run SparkLLM/Spark-X2.6-4B`) for fast CPU inference.",
+  "models_catalog": {
+    "transformers_bf16": {
+      "repo_id": "XHToken/Spark-X2.6-4B",
+      "revision_sha": "64ca8f2a295b8ceb2757b9d4749a6558c4759e5b",
+      "total_bytes": 8239302573,
+      "size_gib": 7.673,
+      "size_gb_decimal": 8.239,
+      "format": "safetensors (5 shards, bfloat16,Spark2_5ForCausalLM)"
+    },
+    "gguf_q4_k_m": {
+      "repo_id": "XHToken/Spark-X2.6-4B-GGUF",
+      "revision_sha": "9d716770ac7477776de5f891f70cdf98b003a5cd",
+      "filename": "Spark-X2.6-4B-Q4_K_M.gguf",
+      "total_bytes": 3543441312,
+      "size_gib": 3.3,
+      "size_gb_decimal": 3.543,
+      "format": "GGUF Q4_K_M (llama.cpp b10828+ / Ollama / LM Studio)"
+    },
+    "gguf_q8_0": {
+      "repo_id": "XHToken/Spark-X2.6-4B-GGUF",
+      "revision_sha": "9d716770ac7477776de5f891f70cdf98b003a5cd",
+      "filename": "Spark-X2.6-4B-Q8_0.gguf",
+      "total_bytes": 4375021824,
+      "size_gib": 4.075,
+      "size_gb_decimal": 4.375,
+      "format": "GGUF Q8_0"
+    }
+  }
+}

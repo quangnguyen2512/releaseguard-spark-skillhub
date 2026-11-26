@@ -1,0 +1,88 @@
+{
+  "impact_recall": 1.0,
+  "compression": 0.7895,
+  "kill_retention": 1.0,
+  "convergence": 0.0504,
+  "detail": {
+    "total_tests": 38,
+    "selected": 8,
+    "impact_nodes": 6,
+    "total_nodes": 119,
+    "covered_funcs": [
+      "validate",
+      "total"
+    ],
+    "missed_funcs": [],
+    "mutants_total": 7,
+    "kill_rate_full": 0.7143,
+    "kill_rate_selected": 0.7143,
+    "selected_test_names": [
+      "test_add_item",
+      "test_create_order",
+      "test_grand_total",
+      "test_order_total",
+      "test_order_validate",
+      "test_run",
+      "test_subtotal",
+      "test_validate_card"
+    ],
+    "mutation_details": [
+      {
+        "file": "models/order.py",
+        "func": "validate",
+        "operator": "flip_compare",
+        "desc": "flip Lt->GtE @line8",
+        "killed_by_full": true,
+        "killed_by_selected": true
+      },
+      {
+        "file": "models/order.py",
+        "func": "validate",
+        "operator": "mutate_return",
+        "desc": "return bool negate @line10",
+        "killed_by_full": true,
+        "killed_by_selected": true
+      },
+      {
+        "file": "models/order.py",
+        "func": "validate",
+        "operator": "drop_call",
+        "desc": "drop call @line7",
+        "killed_by_full": false,
+        "killed_by_selected": false
+      },
+      {
+        "file": "models/order.py",
+        "func": "validate",
+        "operator": "mutate_const",
+        "desc": "const str->\"\" @line8",
+        "killed_by_full": false,
+        "killed_by_selected": false
+      },
+      {
+        "file": "models/order.py",
+        "func": "validate",
+        "operator": "negate_if",
+        "desc": "negate if @line8",
+        "killed_by_full": true,
+        "killed_by_selected": true
+      },
+      {
+        "file": "models/order.py",
+        "func": "total",
+        "operator": "mutate_return",
+        "desc": "return val->not @line12",
+        "killed_by_full": true,
+        "killed_by_selected": true
+      },
+      {
+        "file": "models/order.py",
+        "func": "total",
+        "operator": "mutate_const",
+        "desc": "const str->\"\" @line12",
+        "killed_by_full": true,
+        "killed_by_selected": true
+      }
+    ]
+  }
+}

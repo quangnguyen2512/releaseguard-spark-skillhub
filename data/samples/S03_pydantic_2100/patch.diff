@@ -1,0 +1,18 @@
+diff --git a/validation/schema_config.py b/validation/schema_config.py
+index 1111111..2222222 100644
+--- a/validation/schema_config.py
++++ b/validation/schema_config.py
+@@ -1,4 +1,4 @@
+ def compile_model_config(config_dict):
+     if "allow_mutation" in config_dict:
+-        config_dict = {"frozen": not config_dict["allow_mutation"]}
++        raise ValueError("allow_mutation is removed; use frozen=True")
+     return {"frozen": bool(config_dict.get("frozen", False)), "extra": config_dict.get("extra", "ignore")}
+diff --git a/validation/serializer.py b/validation/serializer.py
+index 1111111..2222222 100644
+--- a/validation/serializer.py
++++ b/validation/serializer.py
+@@ -1,2 +1,2 @@
+ def dump_audit_record(event_name, iso_timestamp):
+-    return {"event": event_name, "recorded_at": iso_timestamp.replace("+00:00", "Z")}
++    return {"event": event_name, "recorded_at": iso_timestamp}

@@ -1,0 +1,905 @@
+{
+  "sample_id": "S05_requests_2322",
+  "project": "psf/requests + urllib3",
+  "from_version": "2.31.0",
+  "to_version": "2.32.2",
+  "release_url": "https://github.com/psf/requests/releases/tag/v2.32.2",
+  "license": "Apache-2.0",
+  "release_lines": [
+    {
+      "line_id": "RN-1",
+      "line_num": 4,
+      "text": "Breaking Security Fix (`CVE-2024-35195`): Custom `TLSAdapter.get_connection_with_tls_context()` implementations in `v2.32.2` must include per-request `verify` in the connection pool key instead of reusing the first cached pool unconditionally."
+    },
+    {
+      "line_id": "RN-2",
+      "line_num": 5,
+      "text": "Breaking Security Fix (`CVE-2024-37891`): `strip_sensitive_redirect_headers()` now strips `Proxy-Authorization` automatically across cross-host redirects unless `trust_env_redirects=True` is explicitly set."
+    },
+    {
+      "line_id": "RN-3",
+      "line_num": 6,
+      "text": "Kept `idna>=2.5,<4` and `certifi>=2017.4.17` dependency bounds unchanged for Python `3.10+` installs."
+    },
+    {
+      "line_id": "RN-4",
+      "line_num": 7,
+      "text": "Updated `Session.mount(\"https://\", adapter)` docstrings to document connection-pool thread safety."
+    }
+  ],
+  "patch_diff_raw": "diff --git a/net_transport/adapters.py b/net_transport/adapters.py\nindex 1111111..2222222 100644\n--- a/net_transport/adapters.py\n+++ b/net_transport/adapters.py\n@@ -3,7 +3,7 @@\n         self._pools = {}\n \n     def get_connection_with_tls_context(self, host, verify=True):\n-        pool_key = host\n+        pool_key = (host, bool(verify))\n         if pool_key not in self._pools:\n             self._pools[pool_key] = {\"host\": host, \"verify\": bool(verify)}\n         return self._pools[pool_key]\ndiff --git a/net_transport/redirects.py b/net_transport/redirects.py\nindex 1111111..2222222 100644\n--- a/net_transport/redirects.py\n+++ b/net_transport/redirects.py\n@@ -1,5 +1,6 @@\n-def strip_sensitive_redirect_headers(headers, same_origin):\n+def strip_sensitive_redirect_headers(headers, same_origin, trust_env_redirects=False):\n     cleaned = dict(headers)\n-    if not same_origin:\n+    if not same_origin and not trust_env_redirects:\n+        cleaned.pop(\"Proxy-Authorization\", None)\n         cleaned.pop(\"Authorization\", None)\n     return cleaned\n",
+  "ground_truth": {
+    "sample_id": "S05_requests_2322",
+    "project": "psf/requests + urllib3",
+    "from_version": "2.31.0",
+    "to_version": "2.32.2",
+    "release_url": "https://github.com/psf/requests/releases/tag/v2.32.2",
+    "license": "Apache-2.0",
+    "acceptance_criteria": [
+      "Must mark CVE-2024-35195 (verify pool key in get_connection_with_tls_context) and CVE-2024-37891 (Proxy-Authorization stripping across redirects) as breaking=true security changes grounded in RN-1 and RN-2.",
+      "Must trace TLSAdapter.get_connection_with_tls_context to clients/artifact_fetcher.py::download_release_tarball and strip_sensitive_redirect_headers to clients/mirror_sync.py::follow_mirror_redirect.",
+      "Must NOT mark RN-3 (unchanged idna/certifi dependency bounds) or RN-4 (docstring update) as breaking=true."
+    ],
+    "expected_breaking_line_ids": [
+      "RN-1",
+      "RN-2"
+    ],
+    "non_breaking_trap_line_ids": [
+      "RN-3",
+      "RN-4"
+    ],
+    "must_include_tokens": [
+      "CVE-2024-35195",
+      "CVE-2024-37891",
+      "Proxy-Authorization",
+      "v2.32.2"
+    ],
+    "expected_changed_files": [
+      "net_transport/adapters.py",
+      "net_transport/redirects.py"
+    ],
+    "expected_seed_nodes": [
+      "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context",
+      "net_transport/redirects.py::strip_sensitive_redirect_headers"
+    ],
+    "expected_affected_callers": [
+      "clients/artifact_fetcher.py::download_release_tarball",
+      "clients/mirror_sync.py::follow_mirror_redirect"
+    ],
+    "expected_selected_tests": [
+      "test_download_release_tarball_verify_key",
+      "test_follow_mirror_redirect_strips_proxy_auth"
+    ],
+    "excluded_unrelated_tests": [
+      "test_parse_cookie_pair"
+    ]
+  },
+  "changeradar": {
+    "cache": {
+      "schema_version": "1.0",
+      "tool": "cache",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "cached": false,
+        "root_hash": "ee36bd4d8d542546e019e065defc61df7f564ee740d93b354b4788bff49db87c",
+        "changed_files": [],
+        "added_files": [],
+        "deleted_files": [
+          "clients/__init__.py",
+          "clients/artifact_fetcher.py",
+          "clients/cookie_jar.py",
+          "clients/mirror_sync.py",
+          "net_transport/__init__.py",
+          "net_transport/adapters.py",
+          "net_transport/redirects.py",
+          "tests/__init__.py",
+          "tests/test_artifact_fetcher.py",
+          "tests/test_cookie_jar.py",
+          "tests/test_mirror_sync.py"
+        ],
+        "rebuild_scope": "full"
+      }
+    },
+    "callgraph": {
+      "schema_version": "1.0",
+      "tool": "callgraph",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "root": "workspaces\\spark_x26_skillhub_100usd\\data\\samples\\S05_requests_2322\\repo",
+        "stats": {
+          "files": 11,
+          "nodes": 21,
+          "edges": 6,
+          "parse_failures": 0,
+          "classes": 1,
+          "dynamic_modules": 0
+        },
+        "nodes": [
+          {
+            "id": "clients/artifact_fetcher.py::<module>",
+            "name": "clients/artifact_fetcher.py",
+            "kind": "module",
+            "file": "clients/artifact_fetcher.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "clients/artifact_fetcher.py::download_release_tarball",
+            "name": "download_release_tarball",
+            "kind": "function",
+            "file": "clients/artifact_fetcher.py",
+            "line_range": [
+              4,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "clients/cookie_jar.py::<module>",
+            "name": "clients/cookie_jar.py",
+            "kind": "module",
+            "file": "clients/cookie_jar.py",
+            "line_range": [
+              1,
+              3
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "clients/cookie_jar.py::parse_cookie_pair",
+            "name": "parse_cookie_pair",
+            "kind": "function",
+            "file": "clients/cookie_jar.py",
+            "line_range": [
+              1,
+              3
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "clients/mirror_sync.py::<module>",
+            "name": "clients/mirror_sync.py",
+            "kind": "module",
+            "file": "clients/mirror_sync.py",
+            "line_range": [
+              1,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "clients/mirror_sync.py::follow_mirror_redirect",
+            "name": "follow_mirror_redirect",
+            "kind": "function",
+            "file": "clients/mirror_sync.py",
+            "line_range": [
+              4,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "clients/__init__.py::<module>",
+            "name": "clients/__init__.py",
+            "kind": "module",
+            "file": "clients/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "net_transport/adapters.py::<module>",
+            "name": "net_transport/adapters.py",
+            "kind": "module",
+            "file": "net_transport/adapters.py",
+            "line_range": [
+              1,
+              9
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "net_transport/adapters.py::TLSAdapter",
+            "name": "TLSAdapter",
+            "kind": "class",
+            "file": "net_transport/adapters.py",
+            "line_range": [
+              1,
+              9
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "bases": null,
+            "is_test": null
+          },
+          {
+            "id": "net_transport/adapters.py::TLSAdapter::__init__",
+            "name": "__init__",
+            "kind": "method",
+            "file": "net_transport/adapters.py",
+            "line_range": [
+              2,
+              3
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "class": "net_transport/adapters.py::TLSAdapter",
+            "is_test": null
+          },
+          {
+            "id": "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context",
+            "name": "get_connection_with_tls_context",
+            "kind": "method",
+            "file": "net_transport/adapters.py",
+            "line_range": [
+              5,
+              9
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "class": "net_transport/adapters.py::TLSAdapter",
+            "is_test": null
+          },
+          {
+            "id": "net_transport/redirects.py::<module>",
+            "name": "net_transport/redirects.py",
+            "kind": "module",
+            "file": "net_transport/redirects.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "net_transport/redirects.py::strip_sensitive_redirect_headers",
+            "name": "strip_sensitive_redirect_headers",
+            "kind": "function",
+            "file": "net_transport/redirects.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": null
+          },
+          {
+            "id": "net_transport/__init__.py::<module>",
+            "name": "net_transport/__init__.py",
+            "kind": "module",
+            "file": "net_transport/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": null
+          },
+          {
+            "id": "tests/test_artifact_fetcher.py::<module>",
+            "name": "tests/test_artifact_fetcher.py",
+            "kind": "module",
+            "file": "tests/test_artifact_fetcher.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_artifact_fetcher.py::test_download_release_tarball_verify_key",
+            "name": "test_download_release_tarball_verify_key",
+            "kind": "function",
+            "file": "tests/test_artifact_fetcher.py",
+            "line_range": [
+              4,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_cookie_jar.py::<module>",
+            "name": "tests/test_cookie_jar.py",
+            "kind": "module",
+            "file": "tests/test_cookie_jar.py",
+            "line_range": [
+              1,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_cookie_jar.py::test_parse_cookie_pair",
+            "name": "test_parse_cookie_pair",
+            "kind": "function",
+            "file": "tests/test_cookie_jar.py",
+            "line_range": [
+              4,
+              5
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_mirror_sync.py::<module>",
+            "name": "tests/test_mirror_sync.py",
+            "kind": "module",
+            "file": "tests/test_mirror_sync.py",
+            "line_range": [
+              1,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/test_mirror_sync.py::test_follow_mirror_redirect_strips_proxy_auth",
+            "name": "test_follow_mirror_redirect_strips_proxy_auth",
+            "kind": "function",
+            "file": "tests/test_mirror_sync.py",
+            "line_range": [
+              4,
+              6
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "decorators": null,
+            "unknown_dispatch": null,
+            "is_test": true
+          },
+          {
+            "id": "tests/__init__.py::<module>",
+            "name": "tests/__init__.py",
+            "kind": "module",
+            "file": "tests/__init__.py",
+            "line_range": [
+              1,
+              1
+            ],
+            "confidence": "exact",
+            "dynamic": null,
+            "is_test": true
+          }
+        ],
+        "edges": [
+          {
+            "from": "clients/artifact_fetcher.py::download_release_tarball",
+            "to": "net_transport/adapters.py::TLSAdapter::__init__",
+            "type": "constructor",
+            "confidence": "exact",
+            "site": {
+              "file": "clients/artifact_fetcher.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "clients/artifact_fetcher.py::download_release_tarball",
+            "to": "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "clients/artifact_fetcher.py",
+              "line": 6
+            }
+          },
+          {
+            "from": "clients/mirror_sync.py::follow_mirror_redirect",
+            "to": "net_transport/redirects.py::strip_sensitive_redirect_headers",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "clients/mirror_sync.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "tests/test_artifact_fetcher.py::test_download_release_tarball_verify_key",
+            "to": "clients/artifact_fetcher.py::download_release_tarball",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_artifact_fetcher.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "tests/test_cookie_jar.py::test_parse_cookie_pair",
+            "to": "clients/cookie_jar.py::parse_cookie_pair",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_cookie_jar.py",
+              "line": 5
+            }
+          },
+          {
+            "from": "tests/test_mirror_sync.py::test_follow_mirror_redirect_strips_proxy_auth",
+            "to": "clients/mirror_sync.py::follow_mirror_redirect",
+            "type": "cross_file",
+            "confidence": "exact",
+            "site": {
+              "file": "tests/test_mirror_sync.py",
+              "line": 5
+            }
+          }
+        ]
+      }
+    },
+    "diffparse": {
+      "schema_version": "1.0",
+      "tool": "diffparse",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "mode": "diff",
+        "changes": [
+          {
+            "file": "net_transport/adapters.py",
+            "change_type": "modified",
+            "lines": [
+              [
+                6,
+                6
+              ]
+            ],
+            "functions": [
+              {
+                "name": "get_connection_with_tls_context",
+                "node_id": "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context",
+                "line_range": [
+                  5,
+                  9
+                ]
+              }
+            ],
+            "unmapped_lines": []
+          },
+          {
+            "file": "net_transport/redirects.py",
+            "change_type": "modified",
+            "lines": [
+              [
+                1,
+                1
+              ],
+              [
+                3,
+                4
+              ]
+            ],
+            "functions": [
+              {
+                "name": "strip_sensitive_redirect_headers",
+                "node_id": "net_transport/redirects.py::strip_sensitive_redirect_headers",
+                "line_range": [
+                  1,
+                  6
+                ]
+              }
+            ],
+            "unmapped_lines": []
+          }
+        ],
+        "commits": []
+      }
+    },
+    "propagate": {
+      "schema_version": "1.0",
+      "tool": "propagate",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "seeds": [
+          "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context",
+          "net_transport/redirects.py::strip_sensitive_redirect_headers"
+        ],
+        "impact": [
+          {
+            "node_id": "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context",
+            "distance": 0,
+            "path": [
+              "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": true
+          },
+          {
+            "node_id": "net_transport/redirects.py::strip_sensitive_redirect_headers",
+            "distance": 0,
+            "path": [
+              "net_transport/redirects.py::strip_sensitive_redirect_headers"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": true
+          },
+          {
+            "node_id": "clients/artifact_fetcher.py::download_release_tarball",
+            "distance": 1,
+            "path": [
+              "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context",
+              "clients/artifact_fetcher.py::download_release_tarball"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": false
+          },
+          {
+            "node_id": "clients/mirror_sync.py::follow_mirror_redirect",
+            "distance": 1,
+            "path": [
+              "net_transport/redirects.py::strip_sensitive_redirect_headers",
+              "clients/mirror_sync.py::follow_mirror_redirect"
+            ],
+            "fan_in": 1,
+            "confidence": "exact",
+            "truncated": false,
+            "is_seed": false
+          }
+        ],
+        "hubs": [],
+        "truncation": {
+          "max_distance": 3,
+          "fanin_cap": 50,
+          "hit_distance_cap": 0,
+          "hit_fanin_cap": 0
+        },
+        "module_fallback": [],
+        "confidence_distribution": {
+          "exact": 4,
+          "conservative": 0,
+          "unknown": 0
+        }
+      }
+    },
+    "testselect": {
+      "schema_version": "1.0",
+      "tool": "testselect",
+      "status": "ok",
+      "errors": [],
+      "data": {
+        "tests": [
+          {
+            "test_file": "test_artifact_fetcher.py",
+            "test_name": "test_download_release_tarball_verify_key",
+            "node_id": [
+              "clients/artifact_fetcher.py::download_release_tarball"
+            ],
+            "coupling_score": 1.0,
+            "coupling_basis": [
+              "direct_call"
+            ],
+            "covers": [
+              "clients/artifact_fetcher.py::download_release_tarball"
+            ],
+            "risk_level": "high"
+          },
+          {
+            "test_file": "test_mirror_sync.py",
+            "test_name": "test_follow_mirror_redirect_strips_proxy_auth",
+            "node_id": [
+              "clients/mirror_sync.py::follow_mirror_redirect"
+            ],
+            "coupling_score": 1.0,
+            "coupling_basis": [
+              "direct_call"
+            ],
+            "covers": [
+              "clients/mirror_sync.py::follow_mirror_redirect"
+            ],
+            "risk_level": "high"
+          }
+        ],
+        "metrics": {
+          "total_tests": 3,
+          "selected": 2,
+          "compression_ratio": 0.667,
+          "impact_coverage": 0.5
+        }
+      }
+    },
+    "changed_files": [
+      "net_transport/adapters.py",
+      "net_transport/redirects.py"
+    ],
+    "seed_nodes": [
+      "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context",
+      "net_transport/redirects.py::strip_sensitive_redirect_headers"
+    ],
+    "affected_callers": [
+      "clients/artifact_fetcher.py::download_release_tarball",
+      "clients/mirror_sync.py::follow_mirror_redirect"
+    ],
+    "all_impact_nodes": [
+      "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context",
+      "net_transport/redirects.py::strip_sensitive_redirect_headers",
+      "clients/artifact_fetcher.py::download_release_tarball",
+      "clients/mirror_sync.py::follow_mirror_redirect"
+    ],
+    "selected_tests": [
+      {
+        "test_file": "test_artifact_fetcher.py",
+        "test_name": "test_download_release_tarball_verify_key",
+        "node_id": [
+          "clients/artifact_fetcher.py::download_release_tarball"
+        ],
+        "coupling_score": 1.0,
+        "coupling_basis": [
+          "direct_call"
+        ],
+        "covers": [
+          "clients/artifact_fetcher.py::download_release_tarball"
+        ],
+        "risk_level": "high"
+      },
+      {
+        "test_file": "test_mirror_sync.py",
+        "test_name": "test_follow_mirror_redirect_strips_proxy_auth",
+        "node_id": [
+          "clients/mirror_sync.py::follow_mirror_redirect"
+        ],
+        "coupling_score": 1.0,
+        "coupling_basis": [
+          "direct_call"
+        ],
+        "covers": [
+          "clients/mirror_sync.py::follow_mirror_redirect"
+        ],
+        "risk_level": "high"
+      }
+    ],
+    "total_tests": 3,
+    "compression_ratio": 0.667,
+    "impact_coverage": 0.5
+  },
+  "prompt_messages": [
+    {
+      "role": "system",
+      "content": "You are ReleaseGuard on Spark-X2.6-4B, guided by SkillHub skill `global/changeradar` (v20260809.064909).\nRules:\n1. NEVER invent call-graph node IDs, changed files, or test names; use ONLY values from `changeradar_json`.\n2. NEVER invent version numbers, percentages, dates, owners, CLI flags, or CVEs absent from `RN-1..RN-N` or `git_diff`.\n3. Output 1 item per `RN-k` (`CHK-1..CHK-N`). `verbatim_quote` MUST be an exact contiguous substring copied verbatim from `[RN-k]` without skipping any words (20-55 chars). Keep `title` and `action` concise (<12 words). Use full `file.py::func` strings from `seeds` in `changed_symbol`.\n4. `breaking:true` ONLY when `[RN-k]` starts with `Breaking` or says `Removed the deprecated`. Deprecations, `Behavior change:`, additive features, opt-in flags, speedups, unchanged bounds, docstrings, and future notes MUST have `breaking:false`.\n5. If `[RN-k]` mentions no owner / no target release date / future discussion, set `breaking:false` and `uncertainty_note:\"No owner or target date set\"`.\n6. Output single-line minified JSON only (no markdown fences, no newlines)."
+    },
+    {
+      "role": "user",
+      "content": "Upgrade `psf/requests + urllib3` `2.31.0`->`2.32.2` (`data/samples/S05_requests_2322/repo`)\nNotes:\n[RN-1] Breaking Security Fix (`CVE-2024-35195`): Custom `TLSAdapter.get_connection_with_tls_context()` implementations in `v2.32.2` must include per-request `verify` in the connection pool key instead of reusing the first cached pool unconditionally.\n[RN-2] Breaking Security Fix (`CVE-2024-37891`): `strip_sensitive_redirect_headers()` now strips `Proxy-Authorization` automatically across cross-host redirects unless `trust_env_redirects=True` is explicitly set.\n[RN-3] Kept `idna>=2.5,<4` and `certifi>=2017.4.17` dependency bounds unchanged for Python `3.10+` installs.\n[RN-4] Updated `Session.mount(\"https://\", adapter)` docstrings to document connection-pool thread safety.\nDiff:\ndiff --git a/net_transport/adapters.py b/net_transport/adapters.py\nindex 1111111..2222222 100644\n--- a/net_transport/adapters.py\n+++ b/net_transport/adapters.py\n@@ -3,7 +3,7 @@\n         self._pools = {}\n \n     def get_connection_with_tls_context(self, host, verify=True):\n-        pool_key = host\n+        pool_key = (host, bool(verify))\n         if pool_key not in self._pools:\n             self._pools[pool_key] = {\"host\": host, \"verify\": bool(verify)}\n         return self._pools[pool_key]\ndiff --git a/net_transport/redirects.py b/net_transport/redirects.py\nindex 1111111..2222222 100644\n--- a/net_transport/redirects.py\n+++ b/net_transport/redirects.py\n@@ -1,5 +1,6 @@\n-def strip_sensitive_redirect_headers(headers, same_origin):\n+def strip_sensitive_redirect_headers(headers, same_origin, trust_env_redirects=False):\n     cleaned = dict(headers)\n-    if not same_origin:\n+    if not same_origin and not trust_env_redirects:\n+        cleaned.pop(\"Proxy-Authorization\", None)\n         cleaned.pop(\"Authorization\", None)\n     return cleaned\nchangeradar_json:\n{\"changed_files\":[\"net_transport/adapters.py\",\"net_transport/redirects.py\"],\"seeds\":[\"net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context\",\"net_transport/redirects.py::strip_sensitive_redirect_headers\"],\"callers\":[{\"id\":\"clients/artifact_fetcher.py::download_release_tarball\",\"via\":\"net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context\"},{\"id\":\"clients/mirror_sync.py::follow_mirror_redirect\",\"via\":\"net_transport/redirects.py::strip_sensitive_redirect_headers\"}],\"tests\":[{\"name\":\"test_download_release_tarball_verify_key\",\"covers\":[\"clients/artifact_fetcher.py::download_release_tarball\"]},{\"name\":\"test_follow_mirror_redirect_strips_proxy_auth\",\"covers\":[\"clients/mirror_sync.py::follow_mirror_redirect\"]}]}\nOutput minified JSON for RN-1..RN-4:\n{\"step0\":{\"schema_version\":\"1.0\",\"mode\":\"diff\",\"target\":{\"path\":\"data/samples/S05_requests_2322/repo\",\"tests_dir\":\"data/samples/S05_requests_2322/repo/tests\"},\"scope\":{\"diff_file\":\"patch.diff\"},\"confidence\":\"high\",\"clarification_needed\":[]},\"items\":[{\"id\":\"CHK-1\",\"title\":\"concise title\",\"action\":\"concise action\",\"breaking\":true,\"severity\":\"breaking|behavior_change|deprecation|additive\",\"release_note_line_id\":\"RN-1\",\"verbatim_quote\":\"exact 20-55 char substring of RN-1\",\"version_or_flag_tokens\":[\"2.32.2\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"file_or_null\",\"changed_symbol\":\"seed_or_null\",\"affected_features\":[\"caller_id\"],\"recommended_tests\":[\"test_name\"]}}]}\nInclude all required source tokens `['CVE-2024-35195', 'CVE-2024-37891', 'Proxy-Authorization', 'v2.32.2']` across `version_or_flag_tokens` where mentioned in Notes. If an RN line matches no seed, use `null` and `[]` in `traced_change`."
+    }
+  ],
+  "inference": {
+    "backend": "openai_compat (http://127.0.0.1:18080/v1)",
+    "is_dry_run": false,
+    "model_id": "Spark-X2.6-4B-Q4_K_M",
+    "model_revision": "9d716770ac7477776de5f891f70cdf98b003a5cd",
+    "quantization_or_dtype": "Q4_K_M",
+    "thinking_mode": "none",
+    "raw_text": "{\"step0\":{\"schema_version\":\"1.0\",\"mode\":\"diff\",\"target\":{\"path\":\"data/samples/S05_requests_2322/repo\",\"tests_dir\":\"data/samples/S05_requests_2322/repo/tests\"},\"scope\":{\"diff_file\":\"patch.diff\"},\"confidence\":\"high\",\"clarification_needed\":[]},\"items\":[{\"id\":\"CHK-1\",\"title\":\"TLSAdapter pool key includes verify\",\"action\":\"include per-request verify in pool key\",\"breaking\":true,\"severity\":\"breaking\",\"release_note_line_id\":\"RN-1\",\"verbatim_quote\":\"Custom `TLSAdapter.get_connection_with_tls_context()` implementations in `v2.32.2` must include per-request `verify` in the connection pool key instead of reusing the first cached pool unconditionally.\",\"version_or_flag_tokens\":[\"2.32.2\",\"CVE-2024-35195\"],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"net_transport/adapters.py\",\"changed_symbol\":\"net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context\",\"affected_features\":[\"clients/artifact_fetcher.py::download_release_tarball\"],\"recommended_tests\":[\"test_download_release_tarball_verify_key\"]}},{\"id\":\"CHK-2\",\"title\":\"strip sensitive redirect headers\",\"action\":\"strip Proxy-Authorization on cross-host redirects\",\"breaking\":true,\"severity\":\"breaking\",\"release_note_line_id\":\"RN-2\",\"verbatim_quote\":\"`strip_sensitive_redirect_headers()` now strips `Proxy-Authorization` automatically across cross-host redirects unless `trust_env_redirects=True` is explicitly set.\",\"version_or_flag_tokens\":[],\"uncertainty_note\":null,\"traced_change\":{\"changed_file\":\"net_transport/redirects.py\",\"changed_symbol\":\"net_transport/redirects.py::strip_sensitive_redirect_headers\",\"affected_features\":[\"clients/mirror_sync.py::follow_mirror_redirect\"],\"recommended_tests\":[\"test_follow_mirror_redirect_strips_proxy_auth\"]}},{\"id\":\"CHK-3\",\"title\":\"Keep dependency bounds unchanged\",\"action\":\"retain idna and certifi bounds for Python 3.10+\",\"breaking\":false,\"severity\":\"additive\",\"release_note_line_id\":\"RN-3\",\"verbatim_quote\":\"Kept `idna>=2.5,<4` and `certifi>=2017.4.17` dependency bounds unchanged for Python `3.10+` installs.\",\"version_or_flag_tokens\":[],\"uncertainty_note\":\"No owner or target date set\",\"traced_change\":{\"changed_file\":null,\"changed_symbol\":null,\"affected_features\":[],\"recommended_tests\":[]}},{\"id\":\"CHK-4\",\"title\":\"Update adapter docstrings\",\"action\":\"document connection-pool thread safety in docstrings\",\"breaking\":false,\"severity\":\"deprecation\",\"release_note_line_id\":\"RN-4\",\"verbatim_quote\":\"Updated `Session.mount(\\\"https://\\\", adapter)` docstrings to document connection-pool thread safety.\",\"version_or_flag_tokens\":[],\"uncertainty_note\":\"No owner or target date set\",\"traced_change\":{\"changed_file\":null,\"changed_symbol\":null,\"affected_features\":[],\"recommended_tests\":[]}}]}",
+    "latency_ms": 252974.34,
+    "prompt_tokens": null,
+    "completion_tokens": 759,
+    "inference_settings": {
+      "api_base": "http://127.0.0.1:18080/v1",
+      "temperature": 0.0,
+      "top_p": 0.95,
+      "max_tokens": 900,
+      "stream": true,
+      "chat_template_kwargs": {
+        "enable_thinking": false
+      }
+    }
+  },
+  "step0_contract": {
+    "schema_version": "1.0",
+    "mode": "diff",
+    "target": {
+      "path": "data/samples/S05_requests_2322/repo",
+      "tests_dir": "data/samples/S05_requests_2322/repo/tests"
+    },
+    "scope": {
+      "diff_file": "patch.diff"
+    },
+    "confidence": "high",
+    "clarification_needed": []
+  },
+  "thinking_trace": "",
+  "checklist_items": [
+    {
+      "id": "CHK-1",
+      "title": "TLSAdapter pool key includes verify",
+      "action": "include per-request verify in pool key",
+      "breaking": true,
+      "severity": "breaking",
+      "release_note_line_id": "RN-1",
+      "verbatim_quote": "Custom `TLSAdapter.get_connection_with_tls_context()` implementations in `v2.32.2` must include per-request `verify` in the connection pool key instead of reusing the first cached pool unconditionally.",
+      "version_or_flag_tokens": [
+        "2.32.2",
+        "CVE-2024-35195"
+      ],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": "net_transport/adapters.py",
+        "changed_symbol": "net_transport/adapters.py::TLSAdapter::get_connection_with_tls_context",
+        "affected_features": [
+          "clients/artifact_fetcher.py::download_release_tarball"
+        ],
+        "recommended_tests": [
+          "test_download_release_tarball_verify_key"
+        ]
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-2",
+      "title": "strip sensitive redirect headers",
+      "action": "strip Proxy-Authorization on cross-host redirects",
+      "breaking": true,
+      "severity": "breaking",
+      "release_note_line_id": "RN-2",
+      "verbatim_quote": "`strip_sensitive_redirect_headers()` now strips `Proxy-Authorization` automatically across cross-host redirects unless `trust_env_redirects=True` is explicitly set.",
+      "version_or_flag_tokens": [],
+      "uncertainty_note": null,
+      "traced_change": {
+        "changed_file": "net_transport/redirects.py",
+        "changed_symbol": "net_transport/redirects.py::strip_sensitive_redirect_headers",
+        "affected_features": [
+          "clients/mirror_sync.py::follow_mirror_redirect"
+        ],
+        "recommended_tests": [
+          "test_follow_mirror_redirect_strips_proxy_auth"
+        ]
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-3",
+      "title": "Keep dependency bounds unchanged",
+      "action": "retain idna and certifi bounds for Python 3.10+",
+      "breaking": false,
+      "severity": "additive",
+      "release_note_line_id": "RN-3",
+      "verbatim_quote": "Kept `idna>=2.5,<4` and `certifi>=2017.4.17` dependency bounds unchanged for Python `3.10+` installs.",
+      "version_or_flag_tokens": [],
+      "uncertainty_note": "No owner or target date set",
+      "traced_change": {
+        "changed_file": null,
+        "changed_symbol": null,
+        "affected_features": [],
+        "recommended_tests": []
+      },
+      "review_status": "pending"
+    },
+    {
+      "id": "CHK-4",
+      "title": "Update adapter docstrings",
+      "action": "document connection-pool thread safety in docstrings",
+      "breaking": false,
+      "severity": "deprecation",
+      "release_note_line_id": "RN-4",
+      "verbatim_quote": "Updated `Session.mount(\"https://\", adapter)` docstrings to document connection-pool thread safety.",
+      "version_or_flag_tokens": [],
+      "uncertainty_note": "No owner or target date set",
+      "traced_change": {
+        "changed_file": null,
+        "changed_symbol": null,
+        "affected_features": [],
+        "recommended_tests": []
+      },
+      "review_status": "pending"
+    }
+  ],
+  "verification": {
+    "sample_id": "S05_requests_2322",
+    "all_gates_passed": false,
+    "gates": [
+      {
+        "gate_id": "G1",
+        "name": "Schema & Step-0 Contract Gate",
+        "passed": true,
+        "summary": "Validated Step-0 contract and 4 checklist item(s).",
+        "violations": []
+      },
+      {
+        "gate_id": "G2",
+        "name": "Verbatim Release-Note Quote Gate",
+        "passed": true,
+        "summary": "4/4 quotes verified verbatim against single source lines.",
+        "violations": []
+      },
+      {
+        "gate_id": "G3",
+        "name": "Zero-Invented Version, Number & Flag Gate",
+        "passed": true,
+        "summary": "All version numbers, metrics, CVEs, and flags grounded in source/diff.",
+        "violations": []
+      },
+      {
+        "gate_id": "G4",
+        "name": "Diff File & Seed Symbol Grounding Gate",
+        "passed": true,
+        "summary": "Every traced file and changed symbol matches `diffparse.py` / `propagate.py` seeds.",
+        "violations": []
+      },
+      {
+        "gate_id": "G5",
+        "name": "ChangeRadar Call-Graph & Test Red-Line Gate",
+        "passed": true,
+        "summary": "100% of traced downstream callers and regression tests verified against `changeradar` AST JSON.",
+        "violations": []
+      },
+      {
+        "gate_id": "G6",
+        "name": "Breaking Polarity & Uncertainty Preservation Gate",
+        "passed": true,
+        "summary": "Breaking polarity and unscheduled-item uncertainty preserved accurately.",
+        "violations": []
+      },
+      {
+        "gate_id": "G7",
+        "name": "Pre-Committed Gold Acceptance Criteria Gate",
+        "passed": false,
+        "summary": "Breaking match=True, seed_recall=100%, caller_recall=100%, test_exact=True.",
+        "violations": [
+          "Missing required acceptance token 'CVE-2024-37891' in checklist output."
+        ]
+      }
+    ],
+    "verified_items_count": 4,
+    "total_items_count": 4,
+    "breaking_precision_match": true,
+    "seed_trace_recall": 1.0,
+    "caller_trace_recall": 1.0,
+    "test_selection_exact": true
+  }
+}
